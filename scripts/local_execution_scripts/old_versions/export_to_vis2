@@ -1,0 +1,9 @@
+#!/bin/bash
+
+echo "starting export_to_vis script"
+/home/james/software/Fiji.app/ImageJ-linux64 --ij2 --headless --allow-multiple --run /home/james/work/eclipse-workspace/Segmented_Image_Analysis/src/scripts/export_to_vis.groovy \
+'deconvFolder = "/home/james/mnt/rdm_adam/MachineLearning_ARC_Grant_work/20190809/Post1/Decon_output/",segFolder = "/home/james/mnt/rdm_adam/MachineLearning_ARC_Grant_work/20190809/Post1/segmentation/",saveFolder = "/home/james/image_data/visualiser/20190809_pre2/",modelName = "d18_rep1ds1gd_rf",segName = "d18_intAdj_rep1ds1gd_rf",stackNums = "[1,2]",stackNumberPrefix = "-t",stackNumberSuffix = "-e",convertRawSegProb = "[true,true,true]",cropRawSegProb = "[true,false,false]",cropBox = "[[171,780],[242,1021],[0,150]]",intensityRange = "[0,3240]",channelSelection = "[3,2,4]"'\
+> export_to_vis.log
+
+echo "finished export_to_vis job script"
+exit

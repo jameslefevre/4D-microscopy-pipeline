@@ -1,0 +1,29 @@
+#!/bin/bash
+
+echo "starting split_object_analysis job script"
+/home/james/software/Fiji.app/ImageJ-linux64 --ij2 --headless --allow-multiple --run /home/james/work/eclipse-workspace/Segmented_Image_Analysis/src/scripts/split_object_analysis.groovy \
+"imageStackLocation='/data/james/image_data/LLS/20190809/20190809_pre1/segmentation/d18_intAdj_rep1ds1gd_rf/segmented/',"\
+"originalStackLocation='',"\
+"probStackLocation='',"\
+"savePath='/data/james/image_data/LLS/20190809/20190809_pre1/segmentation/d18_intAdj_rep1ds1gd_rf/objectAnalysis/',"\
+"firstStackNumber='1',"\
+"lastStackNumber='2',"\
+"numberThreadsToUse='2',"\
+"stackNumberPrefix='-t',"\
+"stackNumberSuffix='-e',"\
+"fileNamePrefix='c1-',"\
+"overwriteExisting='false',"\
+"classesToAnalyse=[1,2,3,4],"\
+"dynamic=[200,20,20,20],"\
+"minVoxExtraObjects=75,"\
+"classNumsToFill=[1,2,3],"\
+"classLayers=[1,2,2,1],"\
+"incorporatedChannels=[[1],[2],[3],[2,3]],"\
+"channelsForDistanceMap=[],"\
+"smoothingErosionForDistanceMap=[],"\
+"intensityScalingFactor=1,"\
+"cropBox=''"\
+> split_object_analysis.log
+
+echo "finished split_object_analysis job script"
+exit

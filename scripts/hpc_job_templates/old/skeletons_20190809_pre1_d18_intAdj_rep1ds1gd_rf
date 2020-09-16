@@ -1,0 +1,24 @@
+#!/bin/bash
+#
+#PBS -N skeletons_20190809_pre1_d18_intAdj_rep1ds1gd_rf
+#PBS -A UQ-IMB
+#PBS -l select=1:ncpus=2:mpiprocs=2:mem=10GB,walltime=1:00:00
+
+(sleep $(( ($PBS_ARRAY_INDEX % 10) * 15 )))
+
+numberStacksPerJob=100
+lastStack=$(( ($numberStacksPerJob)*($PBS_ARRAY_INDEX) ))
+firstStack=$(( ($lastStack)-($numberStacksPerJob)+1 ))
+
+~/Fiji.app/ImageJ-linux64 --ij2 --headless --allow-multiple --run ~/code/object_analysis/get_skeletons.groovy \
+"imageStackLocation='/30days/uqjlefev/20190809/Pre1/segmentation/d18_intAdj_rep1ds1gd_rf/objectAnalysis/',"\
+"savePath='/30days/uqjlefev/20190809/Pre1/segmentation/d18_intAdj_rep1ds1gd_rf/objectAnalysis/',"\
+"firstStackNumber='$firstStack',"\
+"lastStackNumber='$lastStack',"\
+"stackNumberPrefix='-t',"\
+"stackNumberSuffix='-e',"\
+"numberThreadsToUse='2',"\
+"fileNamePrefix='c1-',"\
+"overwriteExisting='false'"
+
+exit 0

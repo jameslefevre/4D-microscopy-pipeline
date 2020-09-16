@@ -1,0 +1,25 @@
+TODO - start only
+need to set up parameterised get_tracks.groovy
+
+
+#!/bin/bash
+
+echo "starting get_tracks script"
+/home/james/software/Fiji.app/ImageJ-linux64 --ij2 --headless --allow-multiple --run /home/james/work/eclipse-workspace/Segmented_Image_Analysis/src/scripts/export_to_vis.groovy \
+'deconvFolder = "/home/james/mnt/rdm_adam/MachineLearning_ARC_Grant_work/20190809/Pre1/Decon_output/",'\
+'segFolder = "/home/james/mnt/rdm_adam/MachineLearning_ARC_Grant_work/20190809/Pre1/segmentation/",'\
+'saveFolder = "/home/james/image_data/visualiser/20190809_pre1/",'\
+'modelName = "d18_rep1ds1gd_rf",'\
+'segName = "d18_intAdj_rep1ds1gd_rf",'\
+'stackNums = "1..10",'\
+'stackNumberPrefix = "-t",'\
+'stackNumberSuffix = "-e",'\
+'convertRawSegProb = "[false,true,true]",'\
+'cropRawSegProb = "[true,false,false]",'\
+'cropBox = "[[154,796],[252,1022],[0,147]]",'\
+'intensityRange = "[0,3349]",'\
+'channelSelection = "[3,2,4]"'\
+> get_tracks.log
+
+echo "finished get_tracks job script"
+exit

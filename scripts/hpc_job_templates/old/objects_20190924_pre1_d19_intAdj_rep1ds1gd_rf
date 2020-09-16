@@ -1,0 +1,38 @@
+#!/bin/bash
+#
+#PBS -N objects_20190924_pre1_d19_intAdj_rep1ds1gd_rf
+#PBS -A UQ-IMB
+#PBS -l select=1:ncpus=2:mpiprocs=2:mem=80GB,walltime=3:00:00
+
+(sleep $(( ($PBS_ARRAY_INDEX % 10) * 15 )))
+
+numberStacksPerJob=2
+lastStack=$(( ($numberStacksPerJob)*($PBS_ARRAY_INDEX) ))
+firstStack=$(( ($lastStack)-($numberStacksPerJob)+1 ))
+
+echo "job "$PBS_ARRAY_INDEX" stacks "$firstStack" - "$lastStack
+
+~/Fiji.app/ImageJ-linux64 --ij2 --headless --allow-multiple --run ~/code/split_object_analysis.groovy \
+"imageStackLocation='/RDS/Q0930/MachineLearning_ARC_Grant_work/20190924_LLSM_Yvette_CSF/Sample1_pre/segmentation/d19_intAdj_rep1ds1gd_rf/segmented/',"\
+"originalStackLocation='/RDS/Q0930/MachineLearning_ARC_Grant_work/20190924_LLSM_Yvette_CSF/Sample1_pre/Decon_output/',"\
+"probStackLocation='/RDS/Q0930/MachineLearning_ARC_Grant_work/20190924_LLSM_Yvette_CSF/Sample1_pre/segmentation/d19_intAdj_rep1ds1gd_rf/probability_maps/',"\
+"savePath='/RDS/Q0930/MachineLearning_ARC_Grant_work/20190924_LLSM_Yvette_CSF/Sample1_pre/segmentation/d19_intAdj_rep1ds1gd_rf/objectAnalysis2_test/',"\
+"firstStackNumber='$firstStack',"\
+"lastStackNumber='$lastStack',"\
+"numberThreadsToUse='2',"\
+"stackNumberPrefix='-t',"\
+"stackNumberSuffix='-e',"\
+"fileNamePrefix='c1-',"\
+"overwriteExisting='false',"\
+"classesToAnalyse=[1,2,3,4],"\
+"dynamic=[200,10,10,10],"\
+"minVoxExtraObjects=75,"\
+"classNumsToFill=[1,2,3],"\
+"classLayers=[1,2,2,1],"\
+"incorporatedChannels=[[1],[2],[3],[2,3]],"\
+"channelsForDistanceMap=[1,3],"\
+"smoothingErosionForDistanceMap=[300,20],"\
+"intensityScalingFactor=1.98176773682125,"\
+"cropBox='[[311,733],[160,800],[11,132]]'"
+  
+exit 0

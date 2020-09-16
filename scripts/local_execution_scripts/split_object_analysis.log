@@ -1,0 +1,68 @@
+[c1-t001-et0000000_decon_seg_d18_rep1ds1gd_rf, c1-t002-et0004242_decon_seg_d18_rep1ds1gd_rf]
+null
+null
+loading class map /data/james/image_data/LLS/20190809/20190809_pre1/segmentation/d18_intAdj_rep1ds1gd_rf/segmented/c1-t001-et0000000_decon_seg_d18_rep1ds1gd_rf.tif;
+saving results to /data/james/image_data/LLS/20190809/20190809_pre1/segmentation/d18_intAdj_rep1ds1gd_rf/objectAnalysis/c1-t001-et0000000_decon/
+Started splitObjectAnalyis at 01/31/2020 11:14:56
+checking save folder: /data/james/image_data/LLS/20190809/20190809_pre1/segmentation/d18_intAdj_rep1ds1gd_rf/objectAnalysis/c1-t001-et0000000_decon/
+Directory not found; making it
+1
+2
+3
+Filled 3D holes 01/31/2020 11:15:42
+Started class 1, offset 0   01/31/2020 11:15:42
+voxel sum 2444332
+Computing EDT; using xy res 104.00416016640665 and z res 268.146
+Smoothing EDT
+Started class 2, offset 11   01/31/2020 11:16:25
+voxel sum 2444332
+Computing EDT; using xy res 104.00416016640665 and z res 268.146
+Smoothing EDT
+Started class 3, offset 172   01/31/2020 11:17:00
+voxel sum 2444332
+Computing EDT; using xy res 104.00416016640665 and z res 268.146
+Smoothing EDT
+Started class 4, offset 532   01/31/2020 11:17:35
+voxel sum 2444332
+Computing EDT; using xy res 104.00416016640665 and z res 268.146
+Smoothing EDT
+Saving object stats 01/31/2020 11:18:10
+[I@6fd55dd2
+876
+  saved to /data/james/image_data/LLS/20190809/20190809_pre1/segmentation/d18_intAdj_rep1ds1gd_rf/objectAnalysis/c1-t001-et0000000_decon/objectStats.txt
+Calculating and saving object adjacencies 01/31/2020 11:18:13
+Save class summary info 01/31/2020 11:18:16
+loading class map /data/james/image_data/LLS/20190809/20190809_pre1/segmentation/d18_intAdj_rep1ds1gd_rf/segmented/c1-t002-et0004242_decon_seg_d18_rep1ds1gd_rf.tif;
+saving results to /data/james/image_data/LLS/20190809/20190809_pre1/segmentation/d18_intAdj_rep1ds1gd_rf/objectAnalysis/c1-t002-et0004242_decon/
+Started splitObjectAnalyis at 01/31/2020 11:18:16
+checking save folder: /data/james/image_data/LLS/20190809/20190809_pre1/segmentation/d18_intAdj_rep1ds1gd_rf/objectAnalysis/c1-t002-et0004242_decon/
+Directory not found; making it
+1
+2
+3
+Filled 3D holes 01/31/2020 11:19:02
+Started class 1, offset 0   01/31/2020 11:19:03
+voxel sum 2447298
+Computing EDT; using xy res 104.00416016640665 and z res 268.146
+Smoothing EDT
+Started class 2, offset 10   01/31/2020 11:19:40
+voxel sum 2447298
+Computing EDT; using xy res 104.00416016640665 and z res 268.146
+Smoothing EDT
+Started class 3, offset 196   01/31/2020 11:20:13
+voxel sum 2447298
+Computing EDT; using xy res 104.00416016640665 and z res 268.146
+Smoothing EDT
+Started class 4, offset 560   01/31/2020 11:20:53
+voxel sum 2447298
+Computing EDT; using xy res 104.00416016640665 and z res 268.146
+Smoothing EDT
+Saving object stats 01/31/2020 11:21:39
+[I@3eeec2ba
+915
+  saved to /data/james/image_data/LLS/20190809/20190809_pre1/segmentation/d18_intAdj_rep1ds1gd_rf/objectAnalysis/c1-t002-et0004242_decon/objectStats.txt
+Calculating and saving object adjacencies 01/31/2020 11:21:41
+Save class summary info 01/31/2020 11:21:44
+Completed analysis for following segmented images:
+[c1-t001-et0000000_decon_seg_d18_rep1ds1gd_rf, c1-t002-et0004242_decon_seg_d18_rep1ds1gd_rf]
+done

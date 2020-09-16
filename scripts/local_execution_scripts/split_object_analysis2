@@ -1,0 +1,29 @@
+#!/bin/bash
+
+echo "starting split_object_analysis job script"
+/home/james/software/Fiji.app/ImageJ-linux64 --ij2 --headless --allow-multiple --run /home/james/work/eclipse-workspace/Segmented_Image_Analysis/src/scripts/split_object_analysis.groovy \
+"imageStackLocation='/home/james/mnt/rdm_adam/MachineLearning_ARC_Grant_work/20190830_LLSM_Yvette/Pre1/segmentation/d19_intAdj_rep1ds1gd_rf/segmented/',"\
+"originalStackLocation='/home/james/mnt/rdm_adam/MachineLearning_ARC_Grant_work/20190830_LLSM_Yvette/Pre1/Decon_output/',"\
+"probStackLocation='/home/james/mnt/rdm_adam/MachineLearning_ARC_Grant_work/20190830_LLSM_Yvette/Pre1/segmentation/d19_intAdj_rep1ds1gd_rf/probability_maps/',"\
+"savePath='/data/james/image_data/LLS/20190830_LLSM_Yvette/20190830_pre1/objectAnalysis_test/',"\
+"firstStackNumber=2,"\
+"lastStackNumber=3,"\
+"numberThreadsToUse='2',"\
+"stackNumberPrefix='-t',"\
+"stackNumberSuffix='-e',"\
+"fileNamePrefix='c1-',"\
+"overwriteExisting='false',"\
+"classesToAnalyse=[1,2,3,4],"\
+"dynamic=[200,20,20,20],"\
+"minVoxExtraObjects=75,"\
+"classNumsToFill=[1,2,3],"\
+"classLayers=[1,2,2,1],"\
+"incorporatedChannels=[[1],[2],[3],[2,3]],"\
+"channelsForDistanceMap=[],"\
+"smoothingErosionForDistanceMap=[],"\
+"intensityScalingFactor=0.9448224,"\
+"cropBox='[[314,761],[282,801],[12,129]]'"\
+> split_object_analysis2.log
+
+echo "finished split_object_analysis job script"
+exit

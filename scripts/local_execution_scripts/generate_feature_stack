@@ -1,0 +1,34 @@
+#!/bin/bash
+
+# generate and save the features needed for segmentation or other purpose
+
+feature_model_table='/home/james/work/machine_learning_organelle_selection_and_feature_detection/trainable_weka/data_and_model_info/feature_model_table.txt'
+imageStackLocation='/home/james/mnt/rdm_adam/MachineLearning_ARC_Grant_work/20190809/Pre1/Decon_output/'
+imageStackName='c1-t001-et0000000_decon'
+modelName='d18_rep1ds1gd_rf'
+featureSavePath='/home/james/work/machine_learning_organelle_selection_and_feature_detection/trainable_weka/22_2019-08_new_data/segmentation_2019-08/test/fs_pre1_1/'
+numberThreadsToUse='3'
+saveProbabilityMaps='true'
+pixelSize_unit='nm'
+pixelSize_xy='104'
+pixelSize_z='268.146'
+intensityScalingFactor='1.4'
+cropBox='154,796,252,1022,0,147' # min,max for x,y,z (0 indexed, endpoints included)
+
+
+echo "Apply cropping box: "$cropBox
+echo "Pixel dimensions: "$pixelSize_xy" (x,y); "$pixelSize_z" (z)"
+echo "intensityScalingFactor: "$intensityScalingFactor
+
+
+/home/james/software/Fiji.app/ImageJ-linux64 --ij2 --headless --run /home/james/work/eclipse-workspace/Segmented_Image_Analysis/src/scripts/generate_save_features.groovy \
+"feature_model_table='$feature_model_table',"\
+"imageStackLocation='$imageStackLocation',"\
+"imageStackName='$imageStackName',"\
+"modelName='$modelName',"\
+"featureSavePath='"$featureSavePath"',"\
+"numberThreadsToUse='$numberThreadsToUse',"\
+"pixelSize_xy='$pixelSize_xy',"\
+"pixelSize_z='$pixelSize_z',"\
+"intensityScalingFactor='$intensityScalingFactor',"\
+"cropBox='$cropBox'"

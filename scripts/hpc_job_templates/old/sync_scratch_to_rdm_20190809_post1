@@ -1,0 +1,12 @@
+#!/bin/bash
+#
+#PBS -N sync_scratch_to_rdm_20190809_post1
+#PBS -A UQ-IMB
+#PBS -l select=1:ncpus=1:mpiprocs=1:mem=2GB,walltime=2:00:00
+
+dataset="20190809/Post1"
+
+mkdir "/RDS/Q0930/MachineLearning_ARC_Grant_work/"$dataset"/segmentation/"
+rsync -rv "/30days/uqjlefev/"$dataset"/segmentation/" "/RDS/Q0930/MachineLearning_ARC_Grant_work/"$dataset"/segmentation/"
+
+exit 0

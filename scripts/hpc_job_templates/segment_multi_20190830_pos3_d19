@@ -1,0 +1,80 @@
+#!/bin/bash
+#
+#PBS -N segment_20190830_pos3_d19
+#PBS -A UQ-IMB
+#PBS -l select=1:ncpus=3:mpiprocs=3:mem=80GB,walltime=1:00:00
+
+
+feature_model_table='/home/uqjlefev/code/feature_model_table.txt'
+imageStackLocation='/RDS/Q0930/MachineLearning_ARC_Grant_work/20190830_LLSM_Yvette/Pos3/Decon_output/'
+modelName='d19_rep1ds1gd_rf'
+modelPath='models/'
+featurePath=$TMPDIR'/fs/'
+savePath='/RDS/Q0930/MachineLearning_ARC_Grant_work/20190830_LLSM_Yvette/Pos3/segmentation/d19_intAdj_rep1ds1gd_rf/'
+numberThreadsToUse='3'
+saveProbabilityMaps='true'
+stackNumberPrefix='t'
+stackNumberSuffix='-e'
+prefix='c1-'
+pixelSize_unit='nm'
+pixelSize_xy='104'
+pixelSize_z='268.146'
+intensityScalingFactor='4.09808073219042'
+intensityScalingFactorTimeStep='1.00059355008728'
+cropBox='393,758,161,903,13,141'
+numberStacksPerJob=10
+
+(sleep $(( ($PBS_ARRAY_INDEX % 10) * 15 )))
+
+let firstStack=$numberStacksPerJob*$PBS_ARRAY_INDEX-$numberStacksPerJob+1
+let lastStack=$numberStacksPerJob*$PBS_ARRAY_INDEX
+
+echo "job "$PBS_ARRAY_INDEX" stacks "$firstStack" - "$lastStack
+echo "Apply cropping box: "$cropBox
+echo "Pixel dimensions: "$pixelSize_xy" (x,y); "$pixelSize_z" (z)"
+
+for ((stackNum=$firstStack;stackNum<=$lastStack;stackNum++))
+do
+intensityScalingFactor=$(echo "$intensityScalingFactor $intensityScalingFactorTimeStep $stackNum" | awk '{print $1*($2^($3-1));}')
+echo "stackNum = "$stackNum
+echo "Adjusted intensityScalingFactor: "$intensityScalingFactor
+imageStackName=$(ls $imageStackLocation | grep "$stackNumberPrefix"0*$stackNum"$stackNumberSuffix" | grep "^$prefix" | cut -d. -f1)
+
+# CI_path_check=$savePath"Classified_Image_"$imageStackName"_"$modelName".tif"
+CI_path_check=$savePath"segmented/"$imageStackName"_seg_"$modelName".tif"
+if [ -f $CI_path_check ]; then
+   echo "Segmented image already exists: exiting job"
+   continue
+fi
+
+
+~/Fiji.app/ImageJ-linux64 --ij2 --headless --run ~/code/generate_save_features.groovy \
+"feature_model_table='$feature_model_table',"\
+"imageStackLocation='$imageStackLocation',"\
+"imageStackName='$imageStackName',"\
+"modelName='$modelName',"\
+"featureSavePath='"$featurePath"',"\
+"numberThreadsToUse='$numberThreadsToUse',"\
+"pixelSize_xy='$pixelSize_xy',"\
+"pixelSize_z='$pixelSize_z',"\
+"intensityScalingFactor='$intensityScalingFactor',"\
+"cropBox='$cropBox'"
+
+~/Fiji.app/ImageJ-linux64 --ij2 --headless --run ~/code/apply_classifiers.groovy \
+"feature_model_table='$feature_model_table',"\
+"imageStackName='$imageStackName',"\
+"featurePath='"$featurePath"',"\
+"modelPath='$modelPath',"\
+"modelName='$modelName',"\
+"savePath='$savePath',"\
+"numberThreadsToUse='$numberThreadsToUse',"\
+"saveProbabilityMaps='$saveProbabilityMaps',"\
+"pixelSize_unit='$pixelSize_unit',"\
+"pixelSize_xy='$pixelSize_xy',"\
+"pixelSize_z='$pixelSize_z'"
+
+done
+
+sleep 10s
+
+echo "Finished"

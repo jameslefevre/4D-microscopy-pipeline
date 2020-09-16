@@ -1,0 +1,23 @@
+#!/bin/bash
+
+echo "starting export_to_vis script"
+/home/james/software/Fiji.app/ImageJ-linux64 --ij2 --headless --allow-multiple --run /home/james/work/eclipse-workspace/Segmented_Image_Analysis/src/scripts/export_to_vis.groovy \
+'imageFolder = "/home/james/mnt/rdm_adam/MachineLearning_ARC_Grant_work/20190809/Pre1/Decon_output/",'\
+'segFolder = "/home/james/mnt/rdm_adam/MachineLearning_ARC_Grant_work/20190809/Pre1/segmentation/d18_intAdj_rep1ds1gd_rf/segmented/",'\
+'probMapFolder = "/home/james/mnt/rdm_adam/MachineLearning_ARC_Grant_work/20190809/Pre1/segmentation/d18_intAdj_rep1ds1gd_rf/probability_maps/",'\
+'imageSaveFolder = "/home/james/image_data/visualiser/20190809_pre1/deconv/",'\
+'segSaveFolder = "/home/james/image_data/visualiser/20190809_pre1/d18_intAdj_rep1ds1gd_rf/segmented/",'\
+'probMapSaveFolder = "/home/james/image_data/visualiser/20190809_pre1/d18_intAdj_rep1ds1gd_rf/probability_maps/",'\
+'alwaysSaveWithImageStackNames = "true",'\
+'stackNums = "1..10",'\
+'stackNumberPrefix = "-t",'\
+'stackNumberSuffix = "-e",'\
+'convertRawSegProb = "[false,true,true]",'\
+'cropRawSegProb = "[true,false,false]",'\
+'cropBox = "[[154,796],[252,1022],[0,147]]",'\
+'intensityRange = "[0,4285]",'\
+'channelSelection = "[3,2,4]"'\
+> export_to_vis.log
+
+echo "finished export_to_vis job script"
+exit

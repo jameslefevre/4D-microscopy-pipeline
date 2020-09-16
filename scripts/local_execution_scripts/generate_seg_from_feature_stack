@@ -1,0 +1,33 @@
+#!/bin/bash
+
+# this is for running a segmentation locally when I already have the required features
+
+feature_model_table='/home/james/work/machine_learning_organelle_selection_and_feature_detection/trainable_weka/data_and_model_info/feature_model_table.txt'
+imageStackName='c1-t001-et0000000_decon'
+modelPath='/home/james/work/machine_learning_organelle_selection_and_feature_detection/trainable_weka/data_and_model_info/'
+modelName='d18_rep1ds1gd_rf'
+featurePath='/home/james/work/machine_learning_organelle_selection_and_feature_detection/trainable_weka/22_2019-08_new_data/segmentation_2019-08/test/fs_pre1_1/'
+savePath='/home/james/work/machine_learning_organelle_selection_and_feature_detection/trainable_weka/22_2019-08_new_data/segmentation_2019-08/test/'
+numberThreadsToUse='4'
+saveProbabilityMaps='true'
+pixelSize_unit='nm'
+pixelSize_xy='104'
+pixelSize_z='268.146'
+
+
+/home/james/software/Fiji.app/ImageJ-linux64 --ij2 --headless --run /home/james/work/eclipse-workspace/Segmented_Image_Analysis/src/scripts/apply_classifiers.groovy \
+"feature_model_table='$feature_model_table',"\
+"imageStackName='$imageStackName',"\
+"featurePath='"$featurePath"',"\
+"modelPath='$modelPath',"\
+"modelName='$modelName',"\
+"savePath='$savePath',"\
+"numberThreadsToUse='$numberThreadsToUse',"\
+"saveProbabilityMaps='$saveProbabilityMaps',"\
+"pixelSize_unit='$pixelSize_unit',"\
+"pixelSize_xy='$pixelSize_xy',"\
+"pixelSize_z='$pixelSize_z',"\
+"channel_grouping="$channel_grouping","\
+"channels="$channels
+
+

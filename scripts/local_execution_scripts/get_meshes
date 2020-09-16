@@ -1,0 +1,19 @@
+#!/bin/bash
+
+echo "starting get_meshes job script"
+/home/james/software/Fiji.app/ImageJ-linux64 --ij2 --headless --allow-multiple --run /home/james/work/eclipse-workspace/Segmented_Image_Analysis/src/scripts/get_meshes.groovy \
+"imageStackLocation='/data/james/image_data/LLS/20190809/20190809_pre1/segmentation/d18_intAdj_rep1ds1gd_rf/objectAnalysis/',"\
+"savePath='/data/james/image_data/LLS/20190809/20190809_pre1/segmentation/d18_intAdj_rep1ds1gd_rf/objectAnalysis/',"\
+"firstStackNumber='1',"\
+"lastStackNumber='2',"\
+"stackNumberPrefix='-t',"\
+"stackNumberSuffix='-e',"\
+"numberThreadsToUse='2',"\
+"fileNamePrefix='c1-',"\
+"overwriteExisting='false',"\
+"targetMeshVertexReduction='[0.96,0.0,0.8,0.8]',"\
+"meshSmoothingIterations='[0,0,0,0]'"\
+> meshes.log
+
+echo "finished get_meshes job script"
+exit

@@ -1,0 +1,14 @@
+starting get_skeletons.groovy:   08/22/2019 16:09:28
+opening /data/james/image_data/LLS/20190809/20190809_pre1/segmentation/d18_intAdj_rep1ds1gd_rf/objectAnalysis/c1-t001-et0000000_decon/object_map.tif:   Succeeded
+opening /data/james/image_data/LLS/20190809/20190809_pre1/segmentation/d18_intAdj_rep1ds1gd_rf/objectAnalysis/c1-t001-et0000000_decon/object_map2.tif:   Succeeded
+opening /data/james/image_data/LLS/20190809/20190809_pre1/segmentation/d18_intAdj_rep1ds1gd_rf/objectAnalysis/c1-t001-et0000000_decon/objectStats.txt:   Succeeded
+Max object id 876
+Found 161 object ids to skeletonise    08/22/2019 16:09:28
+Attempting to save skeletons as /data/james/image_data/LLS/20190809/20190809_pre1/segmentation/d18_intAdj_rep1ds1gd_rf/objectAnalysis/c1-t001-et0000000_decon/objectSkeletons.csv    08/22/2019 16:09:55
+opening /data/james/image_data/LLS/20190809/20190809_pre1/segmentation/d18_intAdj_rep1ds1gd_rf/objectAnalysis/c1-t002-et0004242_decon/object_map.tif:   Succeeded
+opening /data/james/image_data/LLS/20190809/20190809_pre1/segmentation/d18_intAdj_rep1ds1gd_rf/objectAnalysis/c1-t002-et0004242_decon/object_map2.tif:   Succeeded
+opening /data/james/image_data/LLS/20190809/20190809_pre1/segmentation/d18_intAdj_rep1ds1gd_rf/objectAnalysis/c1-t002-et0004242_decon/objectStats.txt:   Succeeded
+Max object id 915
+Found 186 object ids to skeletonise    08/22/2019 16:09:55
+Attempting to save skeletons as /data/james/image_data/LLS/20190809/20190809_pre1/segmentation/d18_intAdj_rep1ds1gd_rf/objectAnalysis/c1-t002-et0004242_decon/objectSkeletons.csv    08/22/2019 16:10:28
+done

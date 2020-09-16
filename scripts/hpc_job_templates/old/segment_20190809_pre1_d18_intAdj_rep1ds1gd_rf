@@ -1,0 +1,73 @@
+#!/bin/bash
+#
+#PBS -N segment_20190809_pre1_d18_intAdj_rep1ds1gd_rf
+#PBS -A UQ-IMB
+#PBS -l select=1:ncpus=3:mpiprocs=3:mem=80GB,walltime=2:00:00
+
+
+feature_model_table='/home/uqjlefev/code/feature_model_table.txt'
+imageStackLocation='/RDS/Q0930/MachineLearning_ARC_Grant_work/20190809/Pre1/Decon_output/'
+modelName='d18_rep1ds1gd_rf'
+modelPath='models/'
+featurePath=$TMPDIR'/fs/'
+savePath='/RDS/Q0930/MachineLearning_ARC_Grant_work/20190809/Pre1/segmentation/d18_intAdj_rep1ds1gd_rf/'
+numberThreadsToUse='3'
+saveProbabilityMaps='true'
+prefix='c1-'
+pixelSize_unit='nm'
+pixelSize_xy='104'
+pixelSize_z='268.146'
+intensityScalingFactor='1.4'
+intensityScalingFactorTimeStep='1.00102384883858'
+cropBox='154,796,252,1022,0,147' # min,max for x,y,z (0 indexed, endpoints included)
+
+
+intensityScalingFactor=$(echo "$intensityScalingFactor $intensityScalingFactorTimeStep $PBS_ARRAY_INDEX" | awk '{print $1*($2^($3-1));}')
+
+echo "PBS_ARRAY_INDEX (timestep) = "$PBS_ARRAY_INDEX
+echo "Apply cropping box: "$cropBox
+echo "Pixel dimensions: "$pixelSize_xy" (x,y); "$pixelSize_z" (z)"
+echo "Adjusted intensityScalingFactor: "$intensityScalingFactor
+
+sf=-et
+printf -v i "%03d" $PBS_ARRAY_INDEX
+st="t$i$sf"
+imageStackName=$(ls $imageStackLocation | grep $st | grep "^$prefix" | cut -d. -f1)
+
+# CI_path_check=$savePath"Classified_Image_"$imageStackName"_"$modelName".tif"
+CI_path_check=$savePath"segmented/"$imageStackName"_seg_"$modelName".tif"
+if [ -f $CI_path_check ]; then
+   echo "Segmented image already exists: exiting job"
+   exit 0
+fi
+
+
+(sleep $(( ($PBS_ARRAY_INDEX % 10) * 15 )))
+
+~/Fiji.app/ImageJ-linux64 --ij2 --headless --run ~/code/generate_save_features.groovy \
+"feature_model_table='$feature_model_table',"\
+"imageStackLocation='$imageStackLocation',"\
+"imageStackName='$imageStackName',"\
+"modelName='$modelName',"\
+"featureSavePath='"$featurePath"',"\
+"numberThreadsToUse='$numberThreadsToUse',"\
+"pixelSize_xy='$pixelSize_xy',"\
+"pixelSize_z='$pixelSize_z',"\
+"intensityScalingFactor='$intensityScalingFactor',"\
+"cropBox='$cropBox'"
+
+~/Fiji.app/ImageJ-linux64 --ij2 --headless --run ~/code/apply_classifiers.groovy \
+"feature_model_table='$feature_model_table',"\
+"imageStackName='$imageStackName',"\
+"featurePath='"$featurePath"',"\
+"modelPath='$modelPath',"\
+"modelName='$modelName',"\
+"savePath='$savePath',"\
+"numberThreadsToUse='$numberThreadsToUse',"\
+"saveProbabilityMaps='$saveProbabilityMaps',"\
+"pixelSize_unit='$pixelSize_unit',"\
+"pixelSize_xy='$pixelSize_xy',"\
+"pixelSize_z='$pixelSize_z'"
+
+sleep 10s
+

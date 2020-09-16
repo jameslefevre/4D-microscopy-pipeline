@@ -1,0 +1,37 @@
+#!/bin/bash
+
+# this is for running a segmentation locally when I already have the required features
+
+feature_model_table='/home/james/work/machine_learning_organelle_selection_and_feature_detection/trainable_weka/code/feature_model_table.txt'
+imageStackLocation='/data/james/image_data/LLS/20190221_slide2/cropped/'
+imageStackName='c1-t001-et0000000_decon_cr'
+modelName='d14_ds1gd_rf'
+modelPath='/home/james/work/machine_learning_organelle_selection_and_feature_detection/trainable_weka/20_2019-03_new_data/new_training_data_2019-03/'
+featurePath='/data/james/image_data/LLS/feature_stacks_and_processed_images/feature_stacks/20190221_slide2_cr_t1/'
+savePath='/RDS/Q0930/MachineLearning_ARC_Grant_work/20190221_Split/Slide2/capture-1/segmentation/d14_ds1gd_rf/'
+numberThreadsToUse='4'
+saveProbabilityMaps='true'
+pixelSizeUnit='nm'
+pixelSize_xy='104'
+pixelSize_z='268.146'
+intensityScalingFactor='1'
+
+
+/home/james/software/Fiji.app/ImageJ-linux64 --ij2 --headless --run /home/james/work/machine_learning_organelle_selection_and_feature_detection/trainable_weka/code/apply_classifiers_6.groovy \
+"feature_model_table='$feature_model_table',"\
+"imageStackLocation='$imageStackLocation',"\
+"imageStackName='$imageStackName',"\
+"featurePath='"$featurePath"',"\
+"modelPath='$modelPath',"\
+"modelName='$modelName',"\
+"savePath='$savePath',"\
+"numberThreadsToUse='$numberThreadsToUse',"\
+"saveProbabilityMaps='$saveProbabilityMaps',"\
+"pixelSize_unit='$pixelSize_unit',"\
+"pixelSize_xy='$pixelSize_xy',"\
+"pixelSize_z='$pixelSize_z',"\
+"intensityScalingFactor='$intensityScalingFactor'"\
+> segmentation.log
+
+
+exit
