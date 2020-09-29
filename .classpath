@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="lib" path="lib/AnalyzeSkeleton_-3.3.0.jar"/>
+	<classpathentry kind="lib" path="lib/commons-io-2.4.jar"/>
+	<classpathentry kind="lib" path="lib/commons-lang3-3.8.1.jar"/>
+	<classpathentry kind="lib" path="lib/ij-1.52n.jar"/>
+	<classpathentry kind="lib" path="lib/mcib3d-core-3.96.jar"/>
+	<classpathentry kind="lib" path="lib/MorphoLibJ_-1.4.0.jar"/>
+	<classpathentry kind="lib" path="lib/Skeletonize3D_-2.1.1.jar"/>
+	<classpathentry kind="lib" path="lib/Trainable_Segmentation-3.2.33.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
