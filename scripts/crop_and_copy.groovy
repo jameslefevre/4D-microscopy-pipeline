@@ -1,16 +1,18 @@
 
+/**
+ * Simple utility script to create a cropped copy of an image stack on disk.
+ * 
+ * cropBox: [[min_x,max_x],[min_y,max_y],[min_z,max_z]], 0 indexed, endpoints included
+ */
+
 #@ String imageLoadPath
 #@ String imageSavePath
 #@ String cropBox
 
- // cropBox: [[min_x,max_x],[min_y,max_y],[min_z,max_z]], 0 indexed, endpoints included
-
 import ij.IJ
 import ij.io.FileSaver
-//import java.io.File
 import ij.ImagePlus
 import ij.ImageStack
-
 
 int[][] cropBox = Eval.me(cropBox);
 

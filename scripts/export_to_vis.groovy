@@ -1,6 +1,63 @@
 
 // TODO:  finish and test this doc; see old versions up to 6
 
+/**
+ * 
+ * Bulk copy and convert image data to a form suitable for custom visualiser tool.
+ * Input data is as tiff image stacks, with file names that can be parsed to get a stack number.
+ * Output data is as png files, each representing a single z-slice; each 3D image stack is converted to a folder
+ * (named for the stack) containing png files named slice0000.png to slice[max].png, where [max] is the number of slices 
+ * minus 1, left padded with zeroes to width 4.
+ * Expects 3 input types: see imageFolder, segFolder, probMapFolder documentation below.
+ * Can choose to process some or all of these types.
+ * 
+ * @param imageFolder
+ * Path to folder containing pre-processed microscopy image data (as a series of single-channel tiff stacks).
+ * @param segFolder
+ * Path to folder containing segmented image stacks (as a series of single-channel 8-bit tiff stacks).
+ * @param probMapFolder
+ * Path to folder containing the probability maps of the segmentations (as a series of multi-channel 8-bit tiff stacks).
+ * @param imageSaveFolder
+ * Root folder to save converted microscopy imaging.
+ * @param segSaveFolder
+ * Root folder to save converted segmentations.
+ * @param probMapSaveFolder
+ * Root folder to save converted segmentation probability maps.
+ * @param alwaysSaveWithImageStackNames
+ * If true, the converted segmentation and probability map stacks are saved under the name of the corresponding
+ * microscopy image stack, rather than the (possibly different) name of the actual stack converted. This simplifies the later 
+ * lookup process (the data can be distinguised since they are in different root folders: see imageSaveFolder, segSaveFolder, 
+ * probMapSaveFolder)
+ * @param stackNums
+ * The time steps / stack numbers to convert, specified as a list of numbers, e.g. [1,101,201,301], or a range, e.g. 1..10
+ * Specifying an excessive range will not cause an error; time steps where no tiff stack exists will simply be skipped.
+ * @param stackNumberPrefix
+ * A string identifying the start of the stack number in the filename (stack number may be left-padded with zeroes).
+ * @param stackNumberSuffix
+ * A string identifying the end of the stack number in the filename. The script will extract the text from the filename 
+ * between stackNumberPrefix and stackNumberSuffix, and attempt to read it as an integer (leading zeros ignored), 
+ * which identifies the stack.
+ * @param convertRawSegProb
+ * Array of 3 flags (true/false), e.g. [true,true,false], indicating which of the 3 image types 
+ * (raw (deconvolved) image, segmentation, probability maps) should be exported as png stacks.
+ * @param cropRawSegProb
+ * Array of 3 flags (true/false) indicating which (if any) of the 3 image types should be cropped before conversion.
+ * @param cropBox
+ * Specification of 3D cropping area, for any cases where cropping is applied: 
+ * [[min_x,max_x],[min_y,max_y],[min_z,max_z]], 0 indexed, endpoints included
+ * @param intensityRange
+ * [min,max] : range of intensities in microscopy image to represent in pngs (values below and above are mapped to 
+ * 0 and max value respectively). The processed image will be 8-bit, generally much smaller than the original image 
+ * (typically 32 bit), so truncation of the range is required due to the very high dynamic range often seen in microscopy data.
+ * @param channelSelection
+ * An array of 3 integers [red_channel,green_channel,blue_channel], each between zero and the number of segmentation classes minus 1; 
+ * specifies which probability map channels to map to the RGB channels.
+ * Using RGB colouring, we can represent a probability map across at most 3 classes (technically 4, where the 4th is background/other,
+ * represented by black or transparent). Note that this limitation does not apply to the actual segmentation, where the only limit to
+ * the classes that can be represented is the number of colours that can be distinguished.
+**/
+
+
 #@ String imageFolder
 #@ String segFolder
 #@ String probMapFolder
@@ -17,22 +74,6 @@
 #@ String intensityRange
 #@ String channelSelection
 
-/**
- * alwaysSaveWithImageStackNames: true/false flag; if true, the converted tiff stacks for the segmentation and probability maps 
- * 		at a given time will be saved under the filename of the corresponding original image stack. This allows consistent naming to be restored between image types.
- * stackNums: the time steps / stack numbers to convert, specified as a list of numbers, e.g. [1,101,201,301], or a range, e.g. 1..10
- * 		Specifying an excessive range will not cause an error; time steps where no tiff stack exists will simply be skipped
- * stackNumberPrefix: A string preceding the stack number in each file name.
- * stackNumberSuffix: A string following the stack number in each file name. It is assumed that the section of the filename between these two strings (text snippets)
- * 		always contains the stack number (leading zeroes allowed).
- * convertRawSegProb: array of 3 flags (true/false), e.g. [true,true,false], indicating which of the 3 image types 
- * 		(raw (deconvolved) image, segmentation, probability maps) should be exported as png stacks
- * cropRawSegProb: array of 3 flags (true/false) indicating which of the 3 image types should be cropped before conversion
- * cropBox: specification of 3D cropping area, if cropping is applied: [[min_x,max_x],[min_y,max_y],[min_z,max_z]], 0 indexed, endpoints included
- * intensityRange: [min,max] : range of intensities in raw image to represent in pngs (values below and above are mapped to 0 and max value respectively)
- * channelSelection: An array of 3 integers [red_channel,green_channel,blue_channel], each between zero and the number of segmentation classes minus 1; 
- * 		specifies which probability map channels to map to the RGB channels
-**/
 
 import ij.IJ
 import ij.io.FileSaver

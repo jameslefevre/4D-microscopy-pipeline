@@ -1,17 +1,64 @@
 
-/*
-imageStackLocation='/home/james/image_data/LLS/feature_stacks_and_processed_images/classified_images/r2_150202_3/d11_all16_rf/splitObjectAnalysis/'
-savePath='/home/james/image_data/LLS/feature_stacks_and_processed_images/classified_images/r2_150202_3/d11_all16_rf/splitObjectAnalysis/'
-firstStackNumber='2'
-lastStackNumber='3'
-stackNumPadLength='4'
-numberThreadsToUse='2'
-
-float[] targetMeshVertexReduction = [0.96,0.0,0.8,0.8] 
-int[] meshSmoothingIterations = [0,0,0,0]
-*/
-
-// TODO: write doc string; see old version notes; clean up
+/**
+ * Generates meshes in the [OBJ format](https://en.wikipedia.org/wiki/Wavefront_.obj_file) 
+ * defining object surfaces. Coordinates are in voxel units. Meshes are used primarily for visualisation, 
+ * but may also be used for analysis. The required input is one or more 8- or 16-bit color tiff stacks 
+ * named object_map.tif, object_map2.tif etc where the (integer) voxel values define object masks. 
+ * In addition, we require a text file objectStats.txt containing a tab-separated table with integer-value 
+ * columns named id and class (any other columns are allowed, but are not used). The IDs must match the 
+ * voxel values in order for objects to be processed, and the class should be correct for the object as 
+ * per the original segmentation and the primary object analysis. This information allows objects to be 
+ * processed according to class (e.g. the amount of mesh thinning can vary by class), and recorded by class and id
+ * in a consistant way.
+ * 
+ * Meshes are generated using the marching cubes algorithm, then optionally smoothed and pruned.
+ * Code is provided by the mcib3d library. Includes an edited version of the removeVertices method from 
+ * the mcib3d library, to allow recovery when the mesh pruning algorithm occasionally 
+ * enters an infinite loop. To this end, the core code is in groovy to allow access to private classes 
+ * in mcib3d (not possible in Java without forking the library).
+ * 
+ * @param imageStackLocation
+ * Path to a directory containing 8-bit color tiff stacks representing segmentation to be analysed.
+ * @param savePath
+ * The directory to save the output files, in subdirectories named for the image stacks processed. 
+ * This should be the same as imageStackLocation, or at least have the same subdirectory names.
+ * @param classesToAnalyse
+ * A list of comma-separated integers between square brackets, e.g. '[1,2,3]', specifying which 
+ * classes to analyse. Each object ID is associated with a class number in objectStats.txt, and the 
+ * object will only be processed if its class number is in this list. 
+ * @param firstStackNumber
+ * The first stack number to process, where the stack number is parsed from the file name using stackNumberPrefix and 
+ * stackNumberSuffix (see below).
+ * @param lastStackNumber
+ * The last stack number to process. Stacks will be processed in order from firstStackNumber to lastStackNumber, inclusive.
+ * @param numberThreadsToUse
+ * The number of threads that ImageJ is asked to use.
+ * @param stackNumberPrefix
+ * A string identifying the start of the stack number in the filename (stack number may be left-padded with zeroes).
+ * @param stackNumberSuffix
+ * A string identifying the end of the stack number in the filename. The script will look for a filename 
+ * which contains a substring consisting of stackNumberPrefix, optional zeros, the stack number associated 
+ * with the job, then stackNumberSuffix.
+ * @param fileNamePrefix
+ * Only stack names starting with this string will be processed; leave blank (prefix='') to skip this filter.
+ * @param overwriteExisting
+ * A string equal to 'true' or 'false'. If false, the job will check for the output file objectStats.txt in the 
+ * expected location, and if present it will not process the stack. This is useful for easily redoing failed 
+ * tasks while not repeating tasks that completed successfully.
+ * @param targetMeshVertexReduction
+ * An array of numbers (i.e. a list of comma-separated numbers between square brackets) between 0 and 1 corresponding 
+ * to classes 1,2, etc. After meshes have been constructed with the marching cubes algorithm, it is generally recommended 
+ * to prune the meshes, reducing the number of faces while retaining a good representation of the surface, in order to 
+ * save resources (disk and RAM space plus processing speed). This number is the target proportion of mesh nodes that 
+ * should be removed (the target may not be obtainable). Pruning may reduce the level of detail in the surface, so this 
+ * parameter should reflect the size and complexity of structures in the class. Small structures may be best without pruning 
+ * (parameter value 0) while larger and simpler structures may benefit from a parameter value approaching 1.
+ * @param meshSmoothingIterations
+ * An array of integers corresponding to classes 1,2, etc, giving the number of smoothing iterations to perform on the 
+ * pruned meshes. Each iteration adjusts the mesh node positions slightly to give a smoother surface rendering, so higher 
+ * numbers give more smoothing, and 0 indicates no smoothing. Again, the parameter choice should reflect the characteristics 
+ * of structures of the class, and the desired tradeoff between smooth surfaces and faithfulness to the segmentation.
+ */
 
 #@ String imageStackLocation
 #@ String savePath
@@ -25,7 +72,6 @@ int[] meshSmoothingIterations = [0,0,0,0]
 #@ Boolean overwriteExisting
 #@ String targetMeshVertexReduction
 #@ String meshSmoothingIterations
-
 
 import ij.IJ
 import ij.ImagePlus
@@ -43,11 +89,6 @@ import java.text.SimpleDateFormat
 import java.util.Arrays;
 import java.util.LinkedList;
 import org.scijava.vecmath.Point3f;
-
-// import segImAnalysis.*;
-
-// int[] classesToMesh = [1,2,3] 
-
 
 int[] classesToAnalyse  = Eval.me(classesToAnalyse)
 int firstStackNumber  = Eval.me(firstStackNumber)
@@ -166,6 +207,8 @@ println("done")
 
 // **************************** functions ********************************************************************************************
 
+// meshToString, getVoxelObjects could be moved to Java code, but decided it wasn't worth the import for this script
+
 void meshToString(List mesh, FileWriter fw){
 	Point3f[] vertices = new Point3f[mesh.size()];
 	// List<Point3f> vertices = mesh;
@@ -201,7 +244,7 @@ void meshToString(List mesh, FileWriter fw){
         // println("added faces")
 }
 
-// slow
+// slow, so not using this version of the method
 String meshToString(List mesh){
 	String st = "";
 	Point3f[] vertices = new Point3f[mesh.size()];
@@ -241,33 +284,33 @@ String meshToString(List mesh){
 	return(st);
 }
 
-// could put this in Java ...
+
+// converting all objects into Object3DVoxels form in single pass through allows efficient 
+// computation of separate meshes for each object
+
 Object3DVoxels[] getVoxelObjects(ImagePlus objectMap, int objectIdMin, int objectIdMax){
-        int n = objectIdMax-objectIdMin+1;
+    int n = objectIdMax-objectIdMin+1;
 	int[] dims = objectMap.getDimensions()
 	assert(dims[2]==1 && dims[4]==1)
 	int dimX = dims[0] ; int dimY = dims[1] ; int dimZ = dims[3]
-	// dimZ = 2 // temp for testing, in case very slow
 	ImageStack ims = objectMap.getImageStack();
 	LinkedList<Voxel3D>[] vox_lists = new LinkedList<Voxel3D>[n]
 	for (int ii=0; ii< n; ii++){
 		vox_lists[ii] = new LinkedList<Voxel3D>()
 	}
 	for (int z=0; z<dimZ; z++){
-		// println(z);
 		for (int x=0; x<dimX; x++){
 			for (int y=0; y<dimY; y++){
 				int voxVal = ims.getVoxel(x,y,z);
 				if (voxVal<objectIdMin || voxVal>objectIdMax) continue
 				vox_lists[voxVal-objectIdMin].add(new Voxel3D(x,y,z,voxVal))
-				// obsVox[voxVal].voxels.add(new Voxel3D(x,y,z,voxVal))
 			}
 		}
 	}
 	Object3DVoxels[] obsVox = new Object3DVoxels[n]
 	for (int ii=0; ii< n; ii++){
 		if (vox_lists[ii].size()>0){
-		obsVox[ii] = new Object3DVoxels(vox_lists[ii])
+			obsVox[ii] = new Object3DVoxels(vox_lists[ii])
 		}
 	}
 	return(obsVox)
@@ -275,31 +318,26 @@ Object3DVoxels[] getVoxelObjects(ImagePlus objectMap, int objectIdMin, int objec
 
 // version with layer support
 Object3DVoxels[] getVoxelObjects(ImagePlus[] objectMaps, int objectIdMin, int objectIdMax){
-        int n = objectIdMax-objectIdMin+1;
+    int n = objectIdMax-objectIdMin+1;
 	LinkedList<Voxel3D>[] vox_lists = new LinkedList<Voxel3D>[n]
 	for (int ii=0; ii< n; ii++){
 		vox_lists[ii] = new LinkedList<Voxel3D>()
 	}
-        for (ImagePlus objectMap : objectMaps){
-  	      int[] dims = objectMap.getDimensions()
+    for (ImagePlus objectMap : objectMaps){
+    	int[] dims = objectMap.getDimensions()
 		assert(dims[2]==1 && dims[4]==1)
 		int dimX = dims[0] ; int dimY = dims[1] ; int dimZ = dims[3]
-		// dimZ = 2 // temp for testing, in case very slow
 		ImageStack ims = objectMap.getImageStack();
-
 		for (int z=0; z<dimZ; z++){
-			// println(z);
 			for (int x=0; x<dimX; x++){
 				for (int y=0; y<dimY; y++){
 					int voxVal = ims.getVoxel(x,y,z);
 					if (voxVal<objectIdMin || voxVal>objectIdMax) continue
 					vox_lists[voxVal-objectIdMin].add(new Voxel3D(x,y,z,voxVal))
-					// obsVox[voxVal].voxels.add(new Voxel3D(x,y,z,voxVal))
 				}
 			}
 		}
 	}
-
 	Object3DVoxels[] obsVox = new Object3DVoxels[n]
 	for (int ii=0; ii< n; ii++){
 		if (vox_lists[ii].size()>0){
@@ -313,42 +351,25 @@ Object3DVoxels[] getVoxelObjects(ImagePlus[] objectMaps, int objectIdMin, int ob
 // targetVertexReduction between 0 and 1; feel free to aim high as it stops when it has to
 List getObjectMesh(Object3DVoxels obVox, float targetVertexReduction, int smoothingIterations){
 	sdf = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss")
-	// ArrayList<Integer> nonNullIndices = new ArrayList<Integer>()
-	// ArrayList<List> obMeshes = new ArrayList<List>() 
-
-
-		// nonNullIndices.add(ii)
-		List<Point3f> mesh = Viewer3D_Utils.computeMeshSurface(obVox,true)
-		// mesh = MeshEditor.smooth(mesh,0) // not helpful
-		IJ.log("Mesh length " + mesh.size() + "    " + sdf.format(new Date()))
-		FullInfoMesh fi_mesh = new FullInfoMesh(mesh)
-		EdgeContraction ec = new EdgeContraction(fi_mesh)
-		int vcount = ec.getRemainingVertexCount()
-		date = new Date(); IJ.log("Vertex count via EdgeContraction object " + vcount + "    " + sdf.format(date))
-		int n = Math.round(vcount*targetVertexReduction)
-		date = new Date(); IJ.log("Attempting to remove " + n + ", leaving " + (vcount-n) + "    " + sdf.format(date))
-		// simplify_mesh(ec,n)
-		// ec.removeNext(n)
-		boolean simp = removeVertices(ec,n)
-		// problem case crashed on retry, so bypass and deal with big mesh
-		if (false && !simp){
-			IJ.log("trying once more ")
-			mesh = ec.getMeshes().get(0).getMesh()
-			n = n + ec.getRemainingVertexCount() - vcount
-			date = new Date(); IJ.log("Attempting to remove further " + n + ", leaving " + (ec.getRemainingVertexCount()-n) + "    " + sdf.format(date))
-			fi_mesh = new FullInfoMesh(mesh)
-			ec = new EdgeContraction(fi_mesh)
-			IJ.log("check nulls: mesh=" + (mesh==null) + ", fi_mesh=" + (fi_mesh==null) + ", ec=" + (ec==null))
-			if ( (mesh!=null) & (fi_mesh!=null) & (ec!=null) ){
-				removeVertices(ec,n)
-			}			
-		}
-		date = new Date(); IJ.log("Remaining vertex count via EdgeContraction object " + ec.getRemainingVertexCount() + "    " + sdf.format(date))
-		mesh = MeshEditor.smooth2(ec.getMeshes().get(0).getMesh(),smoothingIterations)
-		return(mesh)
+	List<Point3f> mesh = Viewer3D_Utils.computeMeshSurface(obVox,true)
+	// mesh = MeshEditor.smooth(mesh,0) // not helpful
+	IJ.log("Mesh length " + mesh.size() + "    " + sdf.format(new Date()))
+	FullInfoMesh fi_mesh = new FullInfoMesh(mesh)
+	EdgeContraction ec = new EdgeContraction(fi_mesh)
+	int vcount = ec.getRemainingVertexCount()
+	date = new Date(); IJ.log("Vertex count via EdgeContraction object " + vcount + "    " + sdf.format(date))
+	int n = Math.round(vcount*targetVertexReduction)
+	date = new Date(); IJ.log("Attempting to remove " + n + ", leaving " + (vcount-n) + "    " + sdf.format(date))
+	// simplify_mesh(ec,n) ; ec.removeNext(n) // this is the original code, had to go deeper due to infinite loop issue
+	boolean simp = removeVertices(ec,n) // note this calls my edited version of the method (below)
+	// in previous code had retry routine when !simp, but this sometimes caused a crach
+	date = new Date(); IJ.log("Remaining vertex count via EdgeContraction object " + ec.getRemainingVertexCount() + "    " + sdf.format(date))
+	mesh = MeshEditor.smooth2(ec.getMeshes().get(0).getMesh(),smoothingIterations)
+	return(mesh)
 }
 
 
+// core mesh thinning step
 // copied from https://github.com/fiji/3D_Viewer/blob/master/src/main/java/customnode/EdgeContraction.java /removeNext
 // adapted to escape the occasional infinite loop 
 boolean removeVertices(EdgeContraction ec, int n) {
@@ -380,10 +401,5 @@ boolean removeVertices(EdgeContraction ec, int n) {
 			// IJ.log(" " + curr)
 		}
 		return(true)
-		//int v = 0;
-		//for (int i = 0; i < ec.mesh.size(); i++)
-		//	v += ec.mesh.get(i).getVertexCount();
-
-		//return v;
 	}
 

@@ -1,5 +1,52 @@
-// TODO: write doc string; see old version notes; clean up
 
+/**
+ * Generates skeleton representations of objects. Each object is eroded in 3D down to a 
+ * [topological skeleton](https://en.wikipedia.org/wiki/Topological_skeleton), and then reduced to summary information 
+ * at the branch level (a branch is a segment of the skeleton between 2 branch or end points). For each branch, we 
+ * save the start and end coordinates, and the curved branch length as well as the straight line distance. 
+ * Coordinates and distances are in the units defined in the image properties. Skeletons are used primarily for 
+ * visualisation, but may also be used for analysis. They are mostly useful for linear structures. As for meshes, this 
+ * script is an add-on to the primary object analysis (see split_object_analysis.groovy), using some of its outputs. 
+ * The required input is one or more 8- or 16-bit color tiff stacks named object_map.tif, object_map2.tif etc where 
+ * the (integer) voxel values define object masks. 
+ * In addition, we require a text file objectStats.txt containing a tab-separated table with integer-value 
+ * columns named id and class (any other columns are allowed, but are not used). The IDs must match the voxel values in 
+ * order for objects to be processed, and the class should be correct for the object as per the original segmentation and 
+ * the primary object analysis.
+ * 
+ * This is a fairly light wrapper around Java code (segImAnalysis.GetSkeletons), which calls core functionality from 
+ * sc.fiji.skeletonize3D and sc.fiji.analyzeSkeleton (Skeletonize and Analyse Skeleton plugins, standard with Fiji).
+ * 
+ * @param imageStackLocation
+ * Path to a directory containing 8-bit color tiff stacks representing segmentation to be analysed.
+ * @param savePath
+ * The directory to save the output files, in subdirectories named for the image stacks processed. 
+ * This should be the same as imageStackLocation, or at least have the same subdirectory names.
+ * @param classesToAnalyse
+ * A list of comma-separated integers between square brackets, e.g. '[1,2,3]', specifying which 
+ * classes to analyse. Each object ID is associated with a class number in objectStats.txt, and the 
+ * object will only be processed if its class number is in this list. 
+ * @param firstStackNumber
+ * The first stack number to process, where the stack number is parsed from the file name using stackNumberPrefix and 
+ * stackNumberSuffix (see below).
+ * @param lastStackNumber
+ * The last stack number to process. Stacks will be processed in order from firstStackNumber to lastStackNumber, inclusive.
+ * @param numberThreadsToUse
+ * The number of threads that ImageJ is asked to use.
+ * @param stackNumberPrefix
+ * A string identifying the start of the stack number in the filename (stack number may be left-padded with zeroes).
+ * @param stackNumberSuffix
+ * A string identifying the end of the stack number in the filename. The script will look for a filename 
+ * which contains a substring consisting of stackNumberPrefix, optional zeros, the stack number associated 
+ * with the job, then stackNumberSuffix.
+ * @param fileNamePrefix
+ * Only stack names starting with this string will be processed; leave blank (prefix='') to skip this filter.
+ * @param overwriteExisting
+ * A string equal to 'true' or 'false'. If false, the job will check for the output file objectStats.txt in the 
+ * expected location, and if present it will not process the stack. This is useful for easily redoing failed 
+ * tasks while not repeating tasks that completed successfully.
+ */
+ 
 #@ String imageStackLocation
 #@ String savePath
 #@ String classesToAnalyse
@@ -50,15 +97,12 @@ for (String fn : files){
 	}
 }
 
-
 for (imageStackName in nameSet){
-
   String saveName = savePath + imageStackName + "/objectSkeletons.csv";
   if ( !overwriteExisting && (new File(saveName)).exists()){
 	println(saveName + " already exists : skipping ")
 	continue;
   }
-
   String imagePath = imageStackLocation + imageStackName + "/object_map.tif";
   print("opening " + imagePath + ":   ");
   // ImagePlus objectMapImage  = IJ.openImage( imagePath ); 
@@ -113,7 +157,6 @@ for (imageStackName in nameSet){
   println("Found " + idsToSkeletonise.size() + " object ids to skeletonise    " + sdf.format(new Date())); 
   
   ResultsTable skelDetails = GetSkeletons.skeletoniseTouchingObjectsLayers(objectMapImages, idsToSkeletonise, null);
-
   
   println("Attempting to save skeletons as " + saveName + "    " + sdf.format(new Date()));
   new File(savePath + imageStackName).mkdirs();

@@ -1,0 +1,167 @@
+feature_name	operation	parameter	sigma	group	downsample	quickTest	model_name_here
+original			0	original		1	1
+Gaussian_blur_1.0	Gaussian Blur 3D...		1	IJ_filter		1	1
+Hessian_largest_1.0_true	Hessian	0	1	ImageScience		1	1
+Hessian_middle_1.0_true	Hessian	1	1	ImageScience			1
+Hessian_smallest_1.0_true	Hessian	2	1	ImageScience			1
+Derivatives_1_1_1_1.0	Derivatives	1	1	ImageScience			1
+Derivatives_2_2_2_1.0	Derivatives	2	1	ImageScience			1
+Derivatives_3_3_3_1.0	Derivatives	3	1	ImageScience			1
+Derivatives_4_4_4_1.0	Derivatives	4	1	ImageScience			1
+Derivatives_5_5_5_1.0	Derivatives	5	1	ImageScience			1
+Laplacian_1.0	Laplacian		1	ImageScience			1
+Edges_1.0	Edges		1	ImageScience			1
+Structure_largest_1.0_1.0	Structure_1	0	1	ImageScience			1
+Structure_middle_1.0_1.0	Structure_1	1	1	ImageScience			1
+Structure_smallest_1.0_1.0	Structure_1	2	1	ImageScience			1
+Structure_largest_1.0_3.0	Structure_3	0	1	ImageScience			1
+Structure_middle_1.0_3.0	Structure_3	1	1	ImageScience			1
+Structure_smallest_1.0_3.0	Structure_3	2	1	ImageScience			1
+Minimum_1.0	Minimum 3D...		1	IJ_filter			1
+Maximum_1.0	Maximum 3D...		1	IJ_filter			1
+Mean_1.0	Mean 3D...		1	IJ_filter			1
+Median_1.0	Median 3D...		1	IJ_filter			1
+Variance_1.0	Variance 3D...		1	IJ_filter			1
+Gaussian_blur_2.0	Gaussian Blur 3D...		2	IJ_filter			1
+Hessian_largest_2.0_true	Hessian	0	2	ImageScience			1
+Hessian_middle_2.0_true	Hessian	1	2	ImageScience			1
+Hessian_smallest_2.0_true	Hessian	2	2	ImageScience			1
+Derivatives_1_1_1_2.0	Derivatives	1	2	ImageScience			1
+Derivatives_2_2_2_2.0	Derivatives	2	2	ImageScience			1
+Derivatives_3_3_3_2.0	Derivatives	3	2	ImageScience			1
+Derivatives_4_4_4_2.0	Derivatives	4	2	ImageScience			1
+Derivatives_5_5_5_2.0	Derivatives	5	2	ImageScience			1
+Laplacian_2.0	Laplacian		2	ImageScience			1
+Edges_2.0	Edges		2	ImageScience		1	1
+Structure_largest_2.0_1.0	Structure_1	0	2	ImageScience			1
+Structure_middle_2.0_1.0	Structure_1	1	2	ImageScience			1
+Structure_smallest_2.0_1.0	Structure_1	2	2	ImageScience			1
+Structure_largest_2.0_3.0	Structure_3	0	2	ImageScience			1
+Structure_middle_2.0_3.0	Structure_3	1	2	ImageScience			1
+Structure_smallest_2.0_3.0	Structure_3	2	2	ImageScience			1
+Minimum_2.0	Minimum 3D...		2	IJ_filter		1	1
+Maximum_2.0	Maximum 3D...		2	IJ_filter			1
+Mean_2.0	Mean 3D...		2	IJ_filter			1
+Median_2.0	Median 3D...		2	IJ_filter			1
+Variance_2.0	Variance 3D...		2	IJ_filter			1
+Gaussian_blur_4.0	Gaussian Blur 3D...		4	IJ_filter			1
+Hessian_largest_4.0_true	Hessian	0	4	ImageScience			1
+Hessian_middle_4.0_true	Hessian	1	4	ImageScience			1
+Hessian_smallest_4.0_true	Hessian	2	4	ImageScience			1
+Derivatives_1_1_1_4.0	Derivatives	1	4	ImageScience			1
+Derivatives_2_2_2_4.0	Derivatives	2	4	ImageScience			1
+Derivatives_3_3_3_4.0	Derivatives	3	4	ImageScience			1
+Derivatives_4_4_4_4.0	Derivatives	4	4	ImageScience			1
+Derivatives_5_5_5_4.0	Derivatives	5	4	ImageScience			1
+Laplacian_4.0	Laplacian		4	ImageScience			1
+Edges_4.0	Edges		4	ImageScience			1
+Structure_largest_4.0_1.0	Structure_1	0	4	ImageScience			1
+Structure_middle_4.0_1.0	Structure_1	1	4	ImageScience			1
+Structure_smallest_4.0_1.0	Structure_1	2	4	ImageScience			1
+Structure_largest_4.0_3.0	Structure_3	0	4	ImageScience			1
+Structure_middle_4.0_3.0	Structure_3	1	4	ImageScience			1
+Structure_smallest_4.0_3.0	Structure_3	2	4	ImageScience			1
+Minimum_4.0	Minimum 3D...		4	IJ_filter			1
+Maximum_4.0	Maximum 3D...		4	IJ_filter			1
+Mean_4.0	Mean 3D...		4	IJ_filter			1
+Median_4.0	Median 3D...		4	IJ_filter			1
+Variance_4.0	Variance 3D...		4	IJ_filter			1
+Gaussian_blur_8.0	Gaussian Blur 3D...		8	IJ_filter			1
+Hessian_largest_8.0_true	Hessian	0	8	ImageScience			1
+Hessian_middle_8.0_true	Hessian	1	8	ImageScience			1
+Hessian_smallest_8.0_true	Hessian	2	8	ImageScience			1
+Derivatives_1_1_1_8.0	Derivatives	1	8	ImageScience			1
+Derivatives_2_2_2_8.0	Derivatives	2	8	ImageScience			1
+Derivatives_3_3_3_8.0	Derivatives	3	8	ImageScience			1
+Derivatives_4_4_4_8.0	Derivatives	4	8	ImageScience			1
+Derivatives_5_5_5_8.0	Derivatives	5	8	ImageScience			1
+Laplacian_8.0	Laplacian		8	ImageScience			1
+Edges_8.0	Edges		8	ImageScience			1
+Structure_largest_8.0_1.0	Structure_1	0	8	ImageScience			1
+Structure_middle_8.0_1.0	Structure_1	1	8	ImageScience			1
+Structure_smallest_8.0_1.0	Structure_1	2	8	ImageScience			1
+Structure_largest_8.0_3.0	Structure_3	0	8	ImageScience			1
+Structure_middle_8.0_3.0	Structure_3	1	8	ImageScience			1
+Structure_smallest_8.0_3.0	Structure_3	2	8	ImageScience			1
+Minimum_8.0	Minimum 3D...		8	IJ_filter			
+Maximum_8.0	Maximum 3D...		8	IJ_filter			
+Mean_8.0	Mean 3D...		8	IJ_filter			
+Median_8.0	Median 3D...		8	IJ_filter			
+Variance_8.0	Variance 3D...		8	IJ_filter			
+Gaussian_blur_16.0	Gaussian Blur 3D...		16	IJ_filter			
+Hessian_largest_16.0_true	Hessian	0	16	ImageScience			
+Hessian_middle_16.0_true	Hessian	1	16	ImageScience			
+Hessian_smallest_16.0_true	Hessian	2	16	ImageScience			
+Derivatives_1_1_1_16.0	Derivatives	1	16	ImageScience			
+Derivatives_2_2_2_16.0	Derivatives	2	16	ImageScience			
+Derivatives_3_3_3_16.0	Derivatives	3	16	ImageScience			
+Derivatives_4_4_4_16.0	Derivatives	4	16	ImageScience			
+Derivatives_5_5_5_16.0	Derivatives	5	16	ImageScience			
+Laplacian_16.0	Laplacian		16	ImageScience			
+Edges_16.0	Edges		16	ImageScience			
+Structure_largest_16.0_1.0	Structure_1	0	16	ImageScience			
+Structure_middle_16.0_1.0	Structure_1	1	16	ImageScience			
+Structure_smallest_16.0_1.0	Structure_1	2	16	ImageScience			
+Structure_largest_16.0_3.0	Structure_3	0	16	ImageScience			
+Structure_middle_16.0_3.0	Structure_3	1	16	ImageScience			
+Structure_smallest_16.0_3.0	Structure_3	2	16	ImageScience			
+Minimum_16.0	Minimum 3D...		16	IJ_filter			
+Maximum_16.0	Maximum 3D...		16	IJ_filter			
+Mean_16.0	Mean 3D...		16	IJ_filter			
+Median_16.0	Median 3D...		16	IJ_filter			
+Variance_16.0	Variance 3D...		16	IJ_filter			
+Gaussian_blur_8.0_ds_2_2_1	Gaussian Blur 3D...		8	IJ_filter	2_2_1		
+Hessian_largest_8.0_true_ds_2_2_1	Hessian	0	8	ImageScience	2_2_1		
+Hessian_middle_8.0_true_ds_2_2_1	Hessian	1	8	ImageScience	2_2_1		
+Hessian_smallest_8.0_true_ds_2_2_1	Hessian	2	8	ImageScience	2_2_1		
+Derivatives_1_1_1_8.0_ds_2_2_1	Derivatives	1	8	ImageScience	2_2_1		
+Derivatives_2_2_2_8.0_ds_2_2_1	Derivatives	2	8	ImageScience	2_2_1		
+Derivatives_3_3_3_8.0_ds_2_2_1	Derivatives	3	8	ImageScience	2_2_1		
+Derivatives_4_4_4_8.0_ds_2_2_1	Derivatives	4	8	ImageScience	2_2_1		
+Derivatives_5_5_5_8.0_ds_2_2_1	Derivatives	5	8	ImageScience	2_2_1		
+Laplacian_8.0_ds_2_2_1	Laplacian		8	ImageScience	2_2_1		
+Edges_8.0_ds_2_2_1	Edges		8	ImageScience	2_2_1		
+Structure_largest_8.0_1.0_ds_2_2_1	Structure_1	0	8	ImageScience	2_2_1		
+Structure_middle_8.0_1.0_ds_2_2_1	Structure_1	1	8	ImageScience	2_2_1		
+Structure_smallest_8.0_1.0_ds_2_2_1	Structure_1	2	8	ImageScience	2_2_1		
+Structure_largest_8.0_3.0_ds_2_2_1	Structure_3	0	8	ImageScience	2_2_1		
+Structure_middle_8.0_3.0_ds_2_2_1	Structure_3	1	8	ImageScience	2_2_1		
+Structure_smallest_8.0_3.0_ds_2_2_1	Structure_3	2	8	ImageScience	2_2_1		
+Minimum_8.0_ds_2_2_1	Minimum 3D...		8	IJ_filter	2_2_1		1
+Maximum_8.0_ds_2_2_1	Maximum 3D...		8	IJ_filter	2_2_1		1
+Mean_8.0_ds_2_2_1	Mean 3D...		8	IJ_filter	2_2_1		1
+Median_8.0_ds_2_2_1	Median 3D...		8	IJ_filter	2_2_1		1
+Variance_8.0_ds_2_2_1	Variance 3D...		8	IJ_filter	2_2_1		1
+Gaussian_blur_16.0_ds_2_2_1	Gaussian Blur 3D...		16	IJ_filter	2_2_1		1
+Hessian_largest_16.0_true_ds_2_2_1	Hessian	0	16	ImageScience	2_2_1		1
+Hessian_middle_16.0_true_ds_2_2_1	Hessian	1	16	ImageScience	2_2_1		1
+Hessian_smallest_16.0_true_ds_2_2_1	Hessian	2	16	ImageScience	2_2_1		1
+Derivatives_1_1_1_16.0_ds_2_2_1	Derivatives	1	16	ImageScience	2_2_1		1
+Derivatives_2_2_2_16.0_ds_2_2_1	Derivatives	2	16	ImageScience	2_2_1		1
+Derivatives_3_3_3_16.0_ds_2_2_1	Derivatives	3	16	ImageScience	2_2_1		1
+Derivatives_4_4_4_16.0_ds_2_2_1	Derivatives	4	16	ImageScience	2_2_1		1
+Derivatives_5_5_5_16.0_ds_2_2_1	Derivatives	5	16	ImageScience	2_2_1		1
+Laplacian_16.0_ds_2_2_1	Laplacian		16	ImageScience	2_2_1		1
+Edges_16.0_ds_2_2_1	Edges		16	ImageScience	2_2_1		1
+Structure_largest_16.0_1.0_ds_2_2_1	Structure_1	0	16	ImageScience	2_2_1		1
+Structure_middle_16.0_1.0_ds_2_2_1	Structure_1	1	16	ImageScience	2_2_1		1
+Structure_smallest_16.0_1.0_ds_2_2_1	Structure_1	2	16	ImageScience	2_2_1		1
+Structure_largest_16.0_3.0_ds_2_2_1	Structure_3	0	16	ImageScience	2_2_1		1
+Structure_middle_16.0_3.0_ds_2_2_1	Structure_3	1	16	ImageScience	2_2_1		1
+Structure_smallest_16.0_3.0_ds_2_2_1	Structure_3	2	16	ImageScience	2_2_1		1
+Minimum_16.0_ds_2_2_1	Minimum 3D...		16	IJ_filter	2_2_1		1
+Maximum_16.0_ds_2_2_1	Maximum 3D...		16	IJ_filter	2_2_1		1
+Mean_16.0_ds_2_2_1	Mean 3D...		16	IJ_filter	2_2_1		1
+Median_16.0_ds_2_2_1	Median 3D...		16	IJ_filter	2_2_1		1
+Variance_16.0_ds_2_2_1	sigma 		16	IJ_filter	2_2_1		1
+GaussDiff_1.0_2.0	Gaussian_blur_2.0,Gaussian_blur_1.0			derived			1
+GaussDiff_1.0_4.0	Gaussian_blur_4.0,Gaussian_blur_1.0			derived			1
+GaussDiff_1.0_8.0	Gaussian_blur_8.0,Gaussian_blur_1.0			derived			1
+GaussDiff_1.0_16.0_ds_2_2_1	Gaussian_blur_16.0_ds_2_2_1,Gaussian_blur_1.0			derived			1
+GaussDiff_2.0_4.0	Gaussian_blur_4.0,Gaussian_blur_2.0			derived			1
+GaussDiff_2.0_8.0	Gaussian_blur_8.0,Gaussian_blur_2.0			derived			1
+GaussDiff_2.0_16.0_ds_2_2_1	Gaussian_blur_16.0_ds_2_2_1,Gaussian_blur_2.0			derived			1
+GaussDiff_4.0_8.0	Gaussian_blur_8.0,Gaussian_blur_4.0			derived			1
+GaussDiff_4.0_16.0_ds_2_2_1	Gaussian_blur_16.0_ds_2_2_1,Gaussian_blur_4.0			derived			1
+GaussDiff_8.0_16.0_ds_2_2_1	Gaussian_blur_16.0_ds_2_2_1,Gaussian_blur_8.0			derived			1
+

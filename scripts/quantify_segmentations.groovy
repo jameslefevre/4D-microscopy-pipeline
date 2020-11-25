@@ -1,21 +1,26 @@
-// open each tif/tiff file in specified folder in alphanum order, extract the stack number, then count the voxels in every class (so table of frequencies)
-// save results in table 
+/**
+ * Simple script to quantify segmentations, by counting the number of voxels in each class.
+ * Expects a folder containing multiple 8-bit 3D tif files, with file names that can be parsed to get a stack number.  
+ * Outputs a single table as a csv file saved to a specified path, with each row representing a stack number and each column a class. 
+ * The values are voxel counts. Opens each tif/tiff file in specified folder in alphanumerical order, extracts the stack number, 
+ * then count the voxels in every class
+ * 
+ * @param inputPath
+ * Absolute path to folder containing tif files (segmentations)
+ * @param outputPath
+ * Absolute path of csv file to write with results
+ * @param stackNumberPrefix
+ * A string identifying the start of the stack number in the filename (stack number may be left-padded with zeroes).
+ * @param stackNumberSuffix
+ * A string identifying the end of the stack number in the filename. The script will extract the text from the filename 
+ * between stackNumberPrefix and stackNumberSuffix, and attempt to read it as an integer (leading zeros ignored), 
+ * which identifies the stack.
+ */
 
 #@ String inputPath
 #@ String outputPath
 #@ String stackNumberPrefix
 #@ String stackNumberSuffix
-
-//String inputPath = "/home/james/work/machine_learning_organelle_selection_and_feature_detection/trainable_weka/23_2019-09_new_data/test_seg/"
-//String outputPath = "/home/james/work/machine_learning_organelle_selection_and_feature_detection/trainable_weka/23_2019-09_new_data/test_seg/"
-//String inputPath = "/home/james/mnt/rdm_adam/MachineLearning_ARC_Grant_work/20190830_LLSM_Yvette/Pos3/segmentation/d18_intAdj_rep1ds1gd_rf/segmented/"
-//String outputPath = "/home/james/mnt/rdm_adam/MachineLearning_ARC_Grant_work/20190830_LLSM_Yvette/Pos3/segmentation/d18_intAdj_rep1ds1gd_rf/"
-//String inputPath = "/home/james/mnt/rdm_adam/MachineLearning_ARC_Grant_work/20190830_LLSM_Yvette/Pos4/segmentation/d19_intAdj_rep1ds1gd_rf/segmented/"
-//String outputPath = "/home/james/mnt/rdm_adam/MachineLearning_ARC_Grant_work/20190830_LLSM_Yvette/Pos4/segmentation/d19_intAdj_rep1ds1gd_rf/"
-//String inputPath = "/home/james/mnt/rdm_adam/MachineLearning_ARC_Grant_work/20190917_LLSM_Yvette_CSF/sample1_pos/segmentation/d19_intAdj_rep1ds1gd_rf/segmented/"
-//String outputPath = "/home/james/mnt/rdm_adam/MachineLearning_ARC_Grant_work/20190917_LLSM_Yvette_CSF/sample1_pos/segmentation/d19_intAdj_rep1ds1gd_rf/"
-//String stackNumberPrefix = "-t"
-//String stackNumberSuffix = "-e"
 
 int maxValueHeader = 3
 // assumed max class number used in heading; if larger number found totals will be printed, extending line

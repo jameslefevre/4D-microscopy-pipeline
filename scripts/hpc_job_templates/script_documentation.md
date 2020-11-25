@@ -1,12 +1,12 @@
-## PBS scripts for deploying semantic segmentation and object analysis algorithms on a HPC cluster
+## PBS array job scripts for deploying semantic segmentation and object analysis algorithms on a HPC cluster
 
 ### About 
 
 This document provides information on the purpose, usage, and parameters of the template PBS job array submission scripts provided in the folder hpc_job_templates. These are intended to be copied, renamed and customised for each data set and possibly for multiple versions of the analysis with different parameters. It is recommended that these copies of the scripts are saved alongside the outputs as a record of the process and parameters used. Due to this repetition, the scripts are documented here rather than in headers.
 
-The scripts call parameterised groovy scripts via a headless ImageJ process, and are designed for deploying the segmantic segmentation and object analysis process on a cluster with a PBS job submission system, allowing multiple image stacks to be processed in parallel. Much of the parameter information below is also included in the headers of the groovy scripts. The scripts form a pipeline, starting with semantic segmentation, then object splitting and analysis based on the segmentation, then generating meshes and skeleton representations of the output.
+The scripts call parameterised groovy scripts via a headless ImageJ process, and are designed for deploying the segmantic segmentation and object analysis process on a cluster with a PBS job submission system, allowing multiple image stacks to be processed in parallel. Most of the parameter information below is also included in the headers of the groovy scripts, and the headers may include additional explanation beyond what is needed for use. The scripts form a pipeline, starting with semantic segmentation, then object splitting and analysis based on the segmentation, then generating meshes and skeleton representations of the output.
 
-compile this doc in linux:  pandoc -o script_documentation.html script_documentation.md
+compile this doc to html in linux:  pandoc -o script_documentation.html script_documentation.md
 
 ### Preparing job scripts
 
@@ -30,15 +30,18 @@ This will create one job for each integer in the specified range. Consult HPC do
 
 ### Semantic segmentation
 
-**template script:** segment_20190809_pre1_d18_intAdj_rep1ds1gd_rf  
+**template script:** segment_20200728_MDA231control_2 / segment_multi_20200728_MDA231control_2
 
-Applies a trained Weka classification model to segment sequences of tiff stacks. Although based on the Trainable Weka ImageJ plugin, a customised process is used. Each job in the array segments one image stack.
+Applies a trained Weka classification model to segment sequences of tiff stacks. Although based on the Trainable Weka ImageJ plugin, a customised process is used. In the standard script, each job in the array segments one image stack, where the stack number (parsed from filename, see stackNumberPrefix and stackNumberSuffix below) matches the PBS_ARRAY_INDEX. In the "multi" script a series of stacks are segmented within each job (allowing control of the degree of parallelism and expected runtime of each job). A job will be allocated stacks numberStacksPerJob*PBS_ARRAY_INDEX-numberStacksPerJob+1 to numberStacksPerJob*PBS_ARRAY_INDEX inclusive.
 
-This job calls the parameterised groovy scripts generate_save_features.groovy and apply_classifiers.groovy. Since these share many parameters, the parameters are defined separately at the top, which is a different setup to the scripts below.
+This job calls the parameterised groovy scripts generate_save_features.groovy and apply_classifiers.groovy. Since these share many parameters, the parameters are defined separately at the top of the job script, which is a different setup to the scripts below.
 
 **Parameters:**  
 
-- feature_model_table: path to a text file containing a tab-separated table of feature and model information, which includes a column specifying the features used in the model to be used. The column heading must be the name of the model file (below). See ??? for details
+- feature_model_table: path to a text file containing a tab-separated table of feature and model information, which includes a column specifying the features used in the model to be used. 
+The column heading must match the modelName parameter (below). Included features are indicated by a '1', excluded features are left blank. See included template file feature_model_table.txt. 
+The first column (feature_name) provides a unique label for each specific image feature, while the next five columns (operation, parameter, sigma, group, downsample) provide information 
+specifying the computation of each feature, used in the groovy scripts (mostly generate_save_features)
 - imageStackLocation: path to a directory containing single channel, 32-bit tiff stacks to be segmented  
 - modelName: The file name of the Weka classification model to be used (not including the .model extension).
 - modelPath: The directory containing the model file 
@@ -53,8 +56,20 @@ This job calls the parameterised groovy scripts generate_save_features.groovy an
 - pixelSize_xy: The size of the voxels in the image in the x and y dimension, in the units specified by pixelSize_unit (it is assumed that the x and y dimensions are equal) 
 - pixelSize_z: The size of the voxels in the image in the z dimension, in the units specified by pixelSize_unit 
 - intensityScalingFactor: An adjustment factor to account for differences in image fluorescence; the input image intensity is multiplied by this number before segmentation. 
-- intensityScalingFactorTimeStep: An additional adjustment to account for fading of image fluorescence over a capture; the inout image intensity is further multiplied by this number to the power of the stack number. 
+- intensityScalingFactorTimeStep: An additional adjustment to account for fading of image fluorescence over a capture; the input image intensity is further multiplied by this number to the power of the stack number. 
 - cropBox: comma separated list of 6 integers describing a 3D crop to be applied to the input image prior to segmentation, or else an empty string to indicate no cropping. The 6 values are minX,maxX,minY,maxY,minZ,maxZ (voxel units, 0 indexed, endpoints included)
+- numberStacksPerJob: Multi-stack version of script only, see discussion at top about stack number allocation.
+- channel_grouping: An array of arrays that collectively contain each of the integers 0..(n-1) exactly once, where n is the number of classes in the model ("channels" parameter below).
+This defines a partition of the classes which can optionally be used to specify groups of classes which should be considered together;
+if the sum of the estimated probability for a voxel over group k is higher than the sum for any other group, then the allocated class will
+be the estimated most probable class within group k, even if there is a class from outside group k with a higher individual probability.
+For example, if classes 1 and 2 are considered quite similar, and class 3 is very distinct, and the estimated probability distribution over 
+classes [1,2,3] is [0.31,0.34,0.35], then it may be considered more correct to label the voxel as class 2 than class 3.
+The default (no grouping) value is '[[0],[1],...,[n-1]]'
+- channels: The number of segmentation classes defined by the supplied model.
+
+
+
 
 ### Primary object analysis
 
@@ -64,13 +79,15 @@ Defines and quantifies objects in a semantic segmentation of a 3D image (provide
 
 This job calls the parameterised groovy script split_object_analysis.groovy 
 
+**Parameters:**  
+
 There is a special parameter numberStacksPerJob which specifies how many stacks a single job will process consecutively; it may be set to any positive integer, allowing for the duration of individual jobs to be adjusted for efficient cluster performance. It is located after the PBS options but before the main call with the remaining parameters, and the value is used in combination with the job array index to automatically set the parameters firstStackNumber and lastStackNumber.
-Job array index i will process stacks $numberStacksPerJob*(i-1)+1$ to $numberStacksPerJob*i$. For example, if numberStacksPerJob is 2, the following generates jobs to process stacks 1 to 20:
+Job array index i (PBS_ARRAY_INDEX in the script) will process stacks numberStacksPerJob*(i-1)+1 to numberStacksPerJob*i. For example, if numberStacksPerJob is 2, the following generates jobs to process stacks 1 to 20:
   
     qsub -q Short -J 1-10 [path to job script] 
 
+The remaining parameters are included in the groovy script call; firstStackNumber and lastStackNumber are defined in terms of numberStacksPerJob and PBS_ARRAY_INDEX as specified above, but the other 19 parameters can be edited to customise the algorithm. These are listed below:
 
-**Parameters:**  
 
 - imageStackLocation: path to a directory containing 8-bit color tiff stacks representing segmentation to be analysed
 - originalStackLocation: optional path to a directory containing the source images (single channel, 32-bit tiff stacks), so that the original image intensity can be quantified in each object.
@@ -101,15 +118,14 @@ Generates meshes in the [OBJ format](https://en.wikipedia.org/wiki/Wavefront_.ob
 
 This job calls the parameterised groovy script get_meshes.groovy, which adapts code from the mcib3d core library for the 3D ImageJ Suite (https://github.com/mcib3d/mcib3d-core).
 
+**Parameters:**  
+
 There is a special parameter numberStacksPerJob which specifies how many stacks a single job will process consecutively; it may be set to any positive integer, allowing for the duration of individual jobs to be adjusted for efficient cluster performance. It is located after the PBS options but before the main call with the remaining parameters, and the value is used in combination with the job array index to automatically set the parameters firstStackNumber and lastStackNumber.
 Job array index i will process stacks $numberStacksPerJob*(i-1)+1$ to $numberStacksPerJob*i$. For example, if numberStacksPerJob is 2, the following generates jobs to process stacks 1 to 20:
   
     qsub -q Short -J 1-10 [path to job script] 
 
-**Parameters:**  
-
-- imageStackLocation: path to a directory containing subdirectories (named for the original image stacks) which each contain the inputs specified above.
-8-bit color tiff stacks representing segmentation to be analysed
+- imageStackLocation: path to a root directory containing subdirectories (named for the original image stacks) which each contain the inputs specified above.
 - savePath: The directory to save the output files, in subdirectories named for the image stacks processed. This should be the same as imageStackLocation, or at least have the same subdirectory names.
 - classesToAnalyse: A list of comma-separated integers between square brackets, e.g. '[1,2,3]', specifying which classes to analyse. Each object ID is associated with a class number in objectStats.txt, and the object will only be processed if its class number is in this list. 
 - numberThreadsToUse: The number of threads that ImageJ should use.
@@ -117,7 +133,7 @@ Job array index i will process stacks $numberStacksPerJob*(i-1)+1$ to $numberSta
 - stackNumberSuffix: A string identifying the end of the stack number in the subdirectory name. The script will look for a filename which contains a substring consisting of stackNumberPrefix, optional zeros, the stack number associated with the job, then stackNumberSuffix
 - fileNamePrefix: Only subdirectory names starting with this string will be processed; leave blank (prefix='') to skip this filter. 
 - overwriteExisting: A string equal to 'true' or 'false'. If false, the job will check for the output file objectMeshes.obj in the expected location, and if present it will not process the stack. This is useful for easily redoing failed tasks while not repeating tasks that completed successfully.
-- targetMeshVertexReduction: An array of numbers (i.e. a list of comma-separated numbers between square brackets) between 0 and 1 corresponding to classes 1,2, etc. After meshes have been constructed with the marching cubes algorithm, it is generally recommended to prune the meshes, reducing the number of faces while retaining a good representation of the surface, in order to save resources (disk and RAM space plus processing speed). This number is the target proportion of mesh nodes that should be removed (the target may not be obtainable). Pruning may reduce the level of detail in the surface, so this parameter should reflect the size and complexity of structures in the class. Small structures may be best without pruning (parameter value 0) while larger and simpler structures may benefit from a aprameter value approaching 1.
+- targetMeshVertexReduction: An array of numbers (i.e. a list of comma-separated numbers between square brackets) between 0 and 1 corresponding to classes 1,2, etc. After meshes have been constructed with the marching cubes algorithm, it is generally recommended to prune the meshes, reducing the number of faces while retaining a good representation of the surface, in order to save resources (disk and RAM space plus processing speed). This number is the target proportion of mesh nodes that should be removed (the target may not be obtainable). Pruning may reduce the level of detail in the surface, so this parameter should reflect the size and complexity of structures in the class. Small structures may be best without pruning (parameter value 0) while larger and simpler structures may benefit from a parameter value approaching 1.
 - meshSmoothingIterations: An array of integers corresponding to classes 1,2, etc, giving the number of smoothing iterations to perform on the pruned meshes. Each iteration adjusts the mesh node positions slightly to give a smoother surface rendering, so higher numbers give more smoothing, and 0 indicates no smoothing. Again, the parameter choice should reflect the characteristics of structures of the class, and the desired tradeoff between smooth surfaces and faithfulness to the segmentation.
 
 
@@ -129,13 +145,12 @@ Generates skeleton representations of objects. Each object is eroded in 3D down 
 
 This job calls the parameterised groovy script get_skeletons.groovy, which adapts code from the mcib3d core library for the 3D ImageJ Suite (https://github.com/mcib3d/mcib3d-core).
 
+**Parameters:**  
+
 There is a special parameter numberStacksPerJob which specifies how many stacks a single job will process consecutively; it may be set to any positive integer, allowing for the duration of individual jobs to be adjusted for efficient cluster performance. It is located after the PBS options but before the main call with the remaining parameters, and the value is used in combination with the job array index to automatically set the parameters firstStackNumber and lastStackNumber.
 Job array index i will process stacks $numberStacksPerJob*(i-1)+1$ to $numberStacksPerJob*i$. For example, if numberStacksPerJob is 2, the following generates jobs to process stacks 1 to 20:
   
     qsub -q Short -J 1-10 [path to job script] 
-
-
-**Parameters:**  
 
 - imageStackLocation: path to a directory containing subdirectories (named for the original image stacks) which each contain the inputs specified above.
 - savePath: The directory to save the output files, in subdirectories named for the image stacks processed. This should be the same as imageStackLocation, or have the same subdirectory names.
@@ -145,7 +160,6 @@ Job array index i will process stacks $numberStacksPerJob*(i-1)+1$ to $numberSta
 - stackNumberSuffix: A string identifying the end of the stack number in the subdirectory name. The script will look for a filename which contains a substring consisting of stackNumberPrefix, optional zeros, the stack number associated with the job, then stackNumberSuffix
 - fileNamePrefix: Only subdirectory names starting with this string will be processed; leave blank (prefix='') to skip this filter. 
 - overwriteExisting: A string equal to 'true' or 'false'. If false, the job will check for the output file objectMeshes.obj in the expected location, and if present it will not process the stack. This is useful for easily redoing failed tasks while not repeating tasks that completed successfully.
-
 
 
 

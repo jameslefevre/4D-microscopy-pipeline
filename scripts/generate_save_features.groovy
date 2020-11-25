@@ -1,3 +1,113 @@
+/** Generates and saves a series of specified 3D image features using the ImageJ filters (Process -> Filters) and the ImageScience library, 
+ *  accessed via the trainableSegmentation / Trainable Weka plugin.
+ *  Feature selection is adapted from trainable weka 3D, with optional downsampling to accelerate the calculation of 
+ *  features with larger sigma (scale parameter).
+ *  
+ *  The selection of features to compute is specified in a supplied file (the feature-model table - see feature_model_table below),
+ *  using a model name to look up the desired set of features.
+ *  
+ *  Computed feature stacks are saved as image sequences named slice_xxxx.tif, where xxxx is the (padded) slice number, starting from zero. 
+ *  Each is saved in root directory featureSavePath within a subdirector named for the feature (feature_name in feature_model_table).
+ *  This is to allow all features for a given slice to be loaded at once (so a segmentation model can be applied) without loading 
+ *  all features at once for the whole image stack, reducing the memory footprint.
+ *  
+ *  3D cropping and intensity scaling is optionally applied to the input prior to any computation, and the adjusted image
+ *  is saved as "original" if this feature is selected in the feature-model table
+ *  
+ *  The input image must be single-channel tiff stack with floating point values. Multi-channel inputs require additional coding.
+ *  
+ *  
+ * @param feature_model_table 
+ * path to tsv file containing a table of information on features and which features to compute for the specified model,  
+ * known as the feature-model table.
+ * The feature_name column gives the label for each specific feature, which is used for the subdirectly name that the 
+ * calculated feature is saved to. The next 5 columns specify the required computation, and are specified primarily 
+ * for use by this script.
+ * 
+ * @param imageStackLocation
+ * The path to the directory containing the input image.
+ * 
+ * @param imageStackName
+ * The name of the input image file, excluding the file extension which is assumed to be .tif
+ *  
+ *  @param modelName 
+ *  Intended as the name of a segmentation model to be applied, in this script it is simply a string used to look up the features 
+ *  to generate in the feature-model table. This name must also match a column in feature_model_table, which contains
+ *  a "1" for each feature used, with no entry in other rows.
+ *  
+ *  @param featureSavePath
+ *  Path to the directory in which to save the feature stacks.
+ *  
+ *  @param numberThreadsToUse 
+ *  number of threads that ImageJ is asked to use
+ *  
+ *  @param pixelSize_xy, pixelSize_z: Used instead of any image properties to convert from pixel dimensions to the real units used in 
+ *  feature generation; the feature generation code actually uses the voxel x dimension as the unit, so only pixelSize_z/pixelSize_xy 
+ *  will have an effect.
+ *  
+ *  @param intensityScalingFactor
+ *  The image stack is multiplied by this value before features are generated
+ *  
+ *  @param cropBox 
+ *  3D crop to be applied to image stack before features are generated;
+ *  comma separated list of 6 integers, min,max for x,y,z (0 indexed, endpoints included) ; empty string means no cropping
+ *  
+ *  DETAILS ON FEATURE-MODEL TABLE AND FEATURE COMPUTATION
+ *  
+ *  The first column of the feature-model table (feature_name) provides a unique label for each specific image feature, 
+ *  while the next five columns (operation, parameter, sigma, group, downsample) provide information specifying the computation 
+ *  of each feature, primarily used here.
+ *  
+ *  group: computed features have group IJ_filter or ImageScience, indicating whether they are provided by the inbuilt image filters 
+ *  or by the ImageScience library (via Trainable Weka interface). This dictates various aspects of implementation through the scripts.
+ *  Other supported groups are "original" (input image to be used as a feature) and "derived" (to be ignored - indicates features that 
+ *  can be easily calculated when needed from other features)
+ *  
+ *  sigma: A scale parameter to be applied in each dimension. Larger sigma means that the feature is calculated based on a larger 
+ *  neighbourhood. The unit is the size of a voxel in the x/y direction (see note on scales below)
+ *  
+ *  downsample: Optional field of the form x_y_z. If specified, the original image is downsampled by the specified factor in each 
+ *  dimension, then the feature is calculated with sigma (kernel size) reduced by the same factor in each dimension, and the 
+ *  result upsampled to the original image size using bilinear interpolation. This provides a computationally cheaper approximation 
+ *  to the feature run directly, due to both the smaller sigma and the reduced number of feature calculations.  
+ *  Note that the feature-model table is used as a single source of truth to help ensure that the same downsampling pattern is 
+ *  used for training and applying a model.
+ *  
+ *  operation, parameter: The particular operation with optional additional parameter with variable meaning. 
+ *  These are combined with other information to form the API call for the specific feature computation.
+ *  
+ *  
+ *  
+ *  NOTE ON IMAGE SCALES
+ *  
+ *  In brief: this script handles non-isometric voxel scales in the z dimension (unequal x and y dimensions could be handled
+ *  with minor modifications, but these are not usual), using parameters to specify the scales (image properties are ignored). 
+ *  The size of the voxel in the x dimension is used as the unit when applying the scale parameter (sigma), so the ratio of the
+ *  x/y dimension to the z dimension of the voxel is the only information used.
+ *  
+ *  The ImageJ filters work in voxel units when applying the scale parameter (sigma), and image properties (which specify the real 
+ *  size represented by a voxel) are ignored.
+ *  The FilterJ plugin, which is a front end for the image feature algorithms in the ImageScience library, works in the same way 
+ *  (voxel units)
+ *  However, the underlying ImageScience library works in terms of the units defined in the image properties, allowing adjustment 
+ *  for non-isometric voxels but potentially working on a very different scale to imageJ filters using the same sigma.
+ *  
+ *  Trainable weka divides the voxel dimensions by the voxel x dimension before calculating features, so effectively the voxel x 
+ *  dimension is the unit for sigma. This means that non-isometric voxels are taken into account, but the scale is still broadly 
+ *  compatible with the ImageJ filters.
+ *  (This was verified for Trainable_Segmentation-3.2.33, with ImageScience features used via the provided API 
+ *  trainableSegmentation.ImageScience; this was not always the cases, and an earlier version did not reconcile the 
+ *  ImageJ and ImageScience scaling)
+ *  
+ *  We follow the Trainable Weka system here, using the voxel x dimension as the unit for sigma. We also call the ImageJ filters 
+ *  with a 3d sigma parameter, allowing us to apply the same interpretation of sigma as for the ImageScience features. However, 
+ *  we specify the voxel dimensions as parameters (pixelSize_xy and pixelSize_z), due to the risk of image properties being lost 
+ *  in file format changes etc.
+ *  
+ *  When calculating features on a downsampled image, ImageScience features can be calculated with unadjusted sigma, since necessary 
+ *  adjustment is done via change in image properties. But for ImageJ filters, the 3d sigma values must be adjusted according to the 
+ *  downsampling.
+ */
 
 #@ String feature_model_table
 #@ String imageStackLocation
@@ -9,43 +119,6 @@
 #@ Float pixelSize_z
 #@ Float intensityScalingFactor
 #@ String cropBox 
-
-/**
-- feature_model_table: path to tsv file containing a table of information on features and which features are used in each model; this is used to determine which features to generate and how to generate them.
-- imageStackLocation, imageStackName: folder and filename (not including tif extension) for the tif stack from which image features will be extracted
-- modelName: used to look up the features to generate in feature_model_table
-- featureSavePath: directory to save the feature stacks in
-- numberThreadsToUse: number of threads to request that ImageJ uses
-- pixelSize_xy, pixelSize_z: Used instead of any image properties to convert from pixel dimensions to the real units used in feature generation; the feature generation code actually uses the voxel x dimension as the unit, so only pixelSize_z/pixelSize_xy will have an effect.
-- intensityScalingFactor: The image stack is multiplied by this value before features are generated
-- cropBox: 3D crop to be applied to image stack prior to processing; comma separated list of 6 integers, min,max for x,y,z (0 indexed, endpoints included) ; empty string means no cropping
-
-Generates a series of 3D image features using the ImageJ filters (Process -> Filters) and the ImageScience library, accessed via the
-trainableSegmentation / Trainable Weka plugin
-Feature selection is adapted from trainable weka 3D, with downsampling to accelerate the calculation of features with larger sigma (scale parameter).
-
-Feature stacks are saved as image sequences named slice_xxxx.tif, where x is the (padded) slice number, starting from zero. 
-Each is saved in featureSavePath within a subdirector named for the feature (feature_name in feature_model_table).
-This is to allow all features for a given slice to be loaded at once (so segmentation model can be applied) without loading all features at once for the whole image stack.
-
-Note that the ImageJ filters work in voxel units when applying the scale parameter (sigma), and image properties are ignored.
-The FilterJ plugin, which is a front end for the image feature algorithms in the ImageScience library, works in the same way (voxel units)
-However, the underlying ImageScience library works in terms of the units defined in the image properties, allowing adjustment for non-isometric 
-voxels but potentially working on a very different scale to imageJ filters using the same sigma.
-
-Trainable weka divides the voxel dimensions by the voxel x dimension before calculating features, so effectively the voxel x dimension is 
-the unit for sigma. This means that non-isometric voxels are taken into account, but the scale is still broadly compatible with 
-the ImageJ filters
-(This was verified for Trainable_Segmentation-3.2.33, with ImageScience features used via the provided api trainableSegmentation.ImageScience;
-this was not always the cases, and an earlier version did not reconcile the ImageJ and ImageScience scaling)
-
-We follow the Trainable Weka system here, using the voxel x dimension as the unit for sigma. We also call the ImageJ filters with a 3d
-sigma parameter, allowing us to apply the same interpretation of sigma as for the ImageScience features.
-
-When calculating features on a downsampled image, ImageScience features can be calculated with unadjusted sigma, since necessary adjustment is done via
-change in image properties. But for ImageJ filters, the 3d sigma values must be adjusted according to the downsampling.
-
-**/
 
 import ij.IJ;
 import ij.io.FileSaver;

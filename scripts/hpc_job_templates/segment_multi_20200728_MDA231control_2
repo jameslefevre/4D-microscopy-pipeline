@@ -1,16 +1,16 @@
 #!/bin/bash
 #
-#PBS -N segment_20190830_pos3_d19
+#PBS -N segment_multi_20200728_MDA231control_2
 #PBS -A UQ-IMB
-#PBS -l select=1:ncpus=3:mpiprocs=3:mem=80GB,walltime=1:00:00
+#PBS -l select=1:ncpus=3:mpiprocs=3:mem=80GB,walltime=4:00:00
 
 
 feature_model_table='/home/uqjlefev/code/feature_model_table.txt'
-imageStackLocation='/RDS/Q0930/MachineLearning_ARC_Grant_work/20190830_LLSM_Yvette/Pos3/Decon_output/'
+imageStackLocation='/RDS/Q0930/MachineLearning_ARC_Grant_work/MDA231Yvette/28072020/MDA231control_2/Decon_output/'
 modelName='d19_rep1ds1gd_rf'
 modelPath='models/'
 featurePath=$TMPDIR'/fs/'
-savePath='/RDS/Q0930/MachineLearning_ARC_Grant_work/20190830_LLSM_Yvette/Pos3/segmentation/d19_intAdj_rep1ds1gd_rf/'
+savePath='/RDS/Q0930/MachineLearning_ARC_Grant_work/MDA231Yvette/28072020/MDA231control_2/segmentation/d19_intAdj_rep1ds1gd_rf/'
 numberThreadsToUse='3'
 saveProbabilityMaps='true'
 stackNumberPrefix='t'
@@ -19,10 +19,14 @@ prefix='c1-'
 pixelSize_unit='nm'
 pixelSize_xy='104'
 pixelSize_z='268.146'
-intensityScalingFactor='4.09808073219042'
-intensityScalingFactorTimeStep='1.00059355008728'
-cropBox='393,758,161,903,13,141'
-numberStacksPerJob=10
+intensityScalingFactor='2.49739854318418'
+intensityScalingFactorTimeStep='1.00023326633857'
+cropBox='205,823,211,741,0,154'
+numberStacksPerJob=20
+channel_grouping='[[0],[1],[2,3]]'
+channels='4'
+
+
 
 (sleep $(( ($PBS_ARRAY_INDEX % 10) * 15 )))
 
@@ -35,9 +39,9 @@ echo "Pixel dimensions: "$pixelSize_xy" (x,y); "$pixelSize_z" (z)"
 
 for ((stackNum=$firstStack;stackNum<=$lastStack;stackNum++))
 do
-intensityScalingFactor=$(echo "$intensityScalingFactor $intensityScalingFactorTimeStep $stackNum" | awk '{print $1*($2^($3-1));}')
+intensityScalingFactorAdjusted=$(echo "$intensityScalingFactor $intensityScalingFactorTimeStep $stackNum" | awk '{print $1*($2^($3-1));}')
 echo "stackNum = "$stackNum
-echo "Adjusted intensityScalingFactor: "$intensityScalingFactor
+echo "Adjusted intensityScalingFactor: "$intensityScalingFactorAdjusted
 imageStackName=$(ls $imageStackLocation | grep "$stackNumberPrefix"0*$stackNum"$stackNumberSuffix" | grep "^$prefix" | cut -d. -f1)
 
 # CI_path_check=$savePath"Classified_Image_"$imageStackName"_"$modelName".tif"
@@ -47,23 +51,25 @@ if [ -f $CI_path_check ]; then
    continue
 fi
 
+echo "Clear feature stack:"
+rm -r $featurePath
 
 ~/Fiji.app/ImageJ-linux64 --ij2 --headless --run ~/code/generate_save_features.groovy \
 "feature_model_table='$feature_model_table',"\
 "imageStackLocation='$imageStackLocation',"\
 "imageStackName='$imageStackName',"\
 "modelName='$modelName',"\
-"featureSavePath='"$featurePath"',"\
+"featureSavePath='$featurePath',"\
 "numberThreadsToUse='$numberThreadsToUse',"\
 "pixelSize_xy='$pixelSize_xy',"\
 "pixelSize_z='$pixelSize_z',"\
-"intensityScalingFactor='$intensityScalingFactor',"\
+"intensityScalingFactor='$intensityScalingFactorAdjusted',"\
 "cropBox='$cropBox'"
 
 ~/Fiji.app/ImageJ-linux64 --ij2 --headless --run ~/code/apply_classifiers.groovy \
 "feature_model_table='$feature_model_table',"\
 "imageStackName='$imageStackName',"\
-"featurePath='"$featurePath"',"\
+"featurePath='$featurePath',"\
 "modelPath='$modelPath',"\
 "modelName='$modelName',"\
 "savePath='$savePath',"\
@@ -71,10 +77,10 @@ fi
 "saveProbabilityMaps='$saveProbabilityMaps',"\
 "pixelSize_unit='$pixelSize_unit',"\
 "pixelSize_xy='$pixelSize_xy',"\
-"pixelSize_z='$pixelSize_z'"
+"pixelSize_z='$pixelSize_z',"\
+"channel_grouping=$channel_grouping,"\
+"channels='$channels'"
 
 done
-
 sleep 10s
-
 echo "Finished"

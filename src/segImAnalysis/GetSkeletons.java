@@ -26,7 +26,7 @@ public class GetSkeletons {
 	 * Based on sc.fiji.skeletonize3D and sc.fiji.analyzeSkeleton
 	 * 
 	 * sc.fiji.skeletonize3D.Skeletonize3D_ requires a binary mask; in order to produce per-object skeletons boundary voxels are eroded (set to 0) to ensure all objects to
-	 * be skeletonised are separated, while other objects are removed entirely from the mask
+	 * be skeletonised are separated, while other objects are removed entirely from the mask.
 	 * 
 	 * @param objectMap						3D image with integer voxel values that denote the id of the object to which the voxel belongs, 0=background
 	 * @param selectedObjectIds				Ids of objects to be skeletonised; if null, all objects are skeletonised

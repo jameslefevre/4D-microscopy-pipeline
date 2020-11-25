@@ -8,8 +8,12 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import ij.IJ;
 import ij.ImagePlus;
+import ij.ImageStack;
 import ij.io.FileSaver;
 import ij.measure.ResultsTable;
+import sc.fiji.skeletonize3D.Skeletonize3D_;
+
+//import segImAnalysis.Skeletonise3D_jl;
 
 // import org.apache.commons.math3.linear; //.EigenDecomposition;
 
@@ -18,6 +22,9 @@ public class TestsAndSmallJobs {
 	static String imFolder = "/home/james/image_data/LLS/feature_stacks_and_processed_images/classified_images/r2_150202_3_d10_all16_rf/";
 	
 	public static void main(String[] args) throws IOException {
+		
+		testMedialSurfaceAlgorithm("/data/james/image_data/LLS/20190830_LLSM_Yvette/20190830_pos4/medial_surface_test_stack1/c1-t001-et0000000_decon_seg_d19_rep1ds1gd_rf.tif",
+				"/data/james/image_data/LLS/20190830_LLSM_Yvette/20190830_pos4/medial_surface_test_stack1/med_surfaces_cells.tif");
 		
 		
 		
@@ -56,6 +63,28 @@ public class TestsAndSmallJobs {
 		//splitObjectanalysisTest();
 		println("done"); 
 
+	}
+	
+	private static void testMedialSurfaceAlgorithm(String loadPath, String savePath) {		
+		System.out.println("begin medial surface test");
+		long timeStart = System.currentTimeMillis();
+		System.out.println("loading " + loadPath);
+		ImagePlus msk  = IJ.openImage( loadPath ); 	
+		System.out.println("convert to mask");
+		IJ.run(msk, "Macro...", "code=v=255*(v==1) stack"); // select class 3 = ruffles
+	  	ImageTypeConversion.imageTypeChangeTrueValue(msk, "8-bit");
+	  	IJ.run(msk, "8-bit", ""); // im.setType(0) doesn't quite work, so resort to macro command
+	  	System.out.println("run erosion algorithm");
+	  	//Skeletonise3D_ skel3D = new Skeletonise3D_();
+		//skel3D.setup("surface",msk);
+		//skel3D.run(null);
+	  	MedialSurface3D_ ms3D = new MedialSurface3D_();
+	  	ms3D.setup("",msk);
+	  	ms3D.run(null);
+	  	
+		System.out.println("saving to " + savePath);
+		new FileSaver( msk).saveAsTiff( savePath);
+		println("done in " + (System.currentTimeMillis()-timeStart)/1000 + " seconds");
 	}
 	
 	private static void splitObjectanalysisTest() throws IOException {
