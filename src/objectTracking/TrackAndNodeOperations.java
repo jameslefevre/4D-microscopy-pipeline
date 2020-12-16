@@ -29,7 +29,6 @@ public class TrackAndNodeOperations {
 	
 	// methods for matching nodes at adjacent times
 	
-	
 	public static void matchNodes(
 			ArrayList<Node> nds1,
 			ArrayList<Node> nds2,
@@ -91,10 +90,20 @@ public class TrackAndNodeOperations {
 				);
 	}
 	
+	/**
+	 * Gets optimal matching between 2 groups of (in general) unequal size, in which each object is matched 
+	 * with 0 or 1 objects in other group (symmetric matching, so formed into pairs).
+	 * <p>
+	 * All match distances are <= maxMatchDist, and we minimise the sum of the match distances plus a penalty 
+	 * of maxMatchDist for each unmatched object
+	 * 
+	 * @param distMatrix
+	 * @param maxMatchDist
+	 * @param verbose
+	 * @return
+	 */
 	public static ArrayList<int[]> partialHungarianMatch(double[][] distMatrix, double maxMatchDist,boolean verbose){
-		// gets optimal matching between 2 groups of unequal size, in which each object is matched with 0 or 1 objects in other group (symmetric matching, so formed into pairs)
-		// all match distances are <= maxMatchDist, and we minimise the sum of the match distances plus a penalty of maxMatchDist for each unmatched object
-		// double epsilon = 0.00001;
+		// 
 		int nrows = distMatrix.length;
 		int ncols = distMatrix[0].length;
 		int n = Math.max(nrows,ncols);
@@ -125,11 +134,6 @@ public class TrackAndNodeOperations {
 	    		if (verbose) {System.out.println("KEEP");}
 	    	}
 	    }
-	    //for (int[] pr : assignment) {
-	    //	double dist = paddedMatrix[pr[0]][pr[1]];
-	    //	System.out.println(pr[0]+", "+pr[1]+": "+dist+ (dist<maxMatchDist ? " include" : " drop"));
-	    //}
-	    //printArray(paddedMatrix);
 	    
 	    return(rowCol); 
 	}
@@ -162,12 +166,22 @@ public class TrackAndNodeOperations {
 		return (relativeNodeContact_weight*relativeNodeContact(n1,n2)/relativeNodeContact_referenceValue + relativeNodeDistance_weight*relativeNodeCloseness(n1,n2)/relativeNodeDistance_referenceValue)/(relativeNodeContact_weight+relativeNodeDistance_weight);
 	}
 	
-	// get an overall score for merging 2 tracks (with possible extensions), by combining nodeMergeScore results on common times with change to match distance penalties
-		// 0 = neutral, higher is evidence for merging
-		// if initial score is<0 but >0 before matching adjustment, look for additional tracks that could be added (specifically looking for case where 2 tracks should be merged, but one is broken by a tracking failure)
-		// additional tracks are added to tracks ArrayList
-		// for extension, go with the first track which improves match score and merge score sum
-		// important that no tracks are changed in this method - informative purposes only
+	// 
+		// 
+		// 
+	/**
+	 * Get an overall score for merging 2 tracks (with possible extensions), 
+	 * by combining nodeMergeScore results on common times with change to match distance penalties;
+	 * 0 = neutral, higher is evidence for merging.
+	 * <p>
+	 * If initial score is <0 but >0 before matching adjustment, look for additional tracks that 
+	 * could be added (specifically looking for case where 2 tracks should be merged, but one is broken 
+	 * by a tracking failure).
+	 * Additional tracks are added to tracks ArrayList. 
+	 * For extension, go with the first track which improves match score and merge score sum.
+	 * <p>
+	 * Important that no tracks are changed in this method - informative purposes only
+	 */
 		public static TrackSetMergeScore trackMergeScore(ArrayList<Track> tracks, 
 				double relativeNodeContact_referenceValue, double relativeNodeDistance_referenceValue, double relativeNodeContact_weight, double relativeNodeDistance_weight,
 				double logSizeWeight, double matchThreshold, double matchScoreWeighting, boolean verbose, boolean haltOnInfiniteScore) {
@@ -404,192 +418,6 @@ public class TrackAndNodeOperations {
 		}
 	
 	
-	// get an overall score for merging 2 tracks (with possible extensions), by combining nodeMergeScore results on common times with change to match distance penalties
-	// 0 = neutral, higher is evidence for merging
-	// if initial score is<0 but >0 before adjustement, look for additional tracks that could be added (specifically looking for case where 2 tracks should be merged, but one is broken by a tracking failure 
-	// additional tracks are added to tracks ArrayList
-	// for extension, go with the first track which improves match score and merge score sum
-	// important that no tracks are changed in this method - informative purposes only
-	public static double[] trackMergeScoreOld2(ArrayList<Track> tracks, 
-			double relativeNodeContact_referenceValue, double relativeNodeDistance_referenceValue, double relativeNodeContact_weight, double relativeNodeDistance_weight,
-			double logSizeWeight, double matchThreshold, double matchScoreWeighting, boolean haltOnInfiniteScore) {
-		double mergeScoreTotal=0;
-		int firstCommonTime = Integer.MAX_VALUE;
-		int lastCommonTime = Integer.MIN_VALUE;
-		for (int ts : tracks.get(0).times()) {
-			if (!tracks.get(1).nodesByTime.containsKey(ts)) {continue;}
-			//commonTimeStepCount++;
-			mergeScoreTotal+=nodeMergeScore(tracks.get(0).nodesByTime.get(ts),tracks.get(1).nodesByTime.get(ts),relativeNodeContact_referenceValue,relativeNodeDistance_referenceValue,relativeNodeContact_weight,relativeNodeDistance_weight)-1;
-			if (ts<firstCommonTime) {firstCommonTime=ts;}
-			if (ts>lastCommonTime) {lastCommonTime=ts;}
-			// test - temp
-//			if (ts==204) {
-//				System.out.println(" dist/contact " +  relativeNodeCloseness(tr1.nodesByTime.get(ts),tr2.nodesByTime.get(ts)) +"/"+ relativeNodeContact(tr1.nodesByTime.get(ts),tr2.nodesByTime.get(ts)) + 
-//						"; ref values " + relativeNodeDistance_referenceValue + "/"+relativeNodeContact_referenceValue + "; weights " + relativeNodeDistance_weight+"/"+relativeNodeContact_weight);
-//			}
-		}
-		
-		// now penalise score by change in total match distance, weighted by matchScoreWeighting; return -inf (always reject) if a new match exceeds threshold
-		double mergeMatch1 = mergedMatchDist(new Track[] {tracks.get(0),tracks.get(1)},firstCommonTime-1,firstCommonTime,logSizeWeight);
-		double mergeMatch2 = mergedMatchDist(new Track[] {tracks.get(0),tracks.get(1)},lastCommonTime,lastCommonTime+1,logSizeWeight);
-		// if (mergeMatch1>matchThreshold || mergeMatch2>matchThreshold ) {return new double[] {Double.NEGATIVE_INFINITY,mergeScoreTotal};}
-		double existingMatchDist1 = 0;
-		double existingMatchDist2 = 0;
-		for (Track tr : tracks) {
-			Node eNode = tr.nodesByTime.get(firstCommonTime);
-			if (eNode.preds.size()>0) {existingMatchDist1+=eNode.nextNodeDist.get(eNode.preds.get(0));}
-			eNode = tr.nodesByTime.get(lastCommonTime);
-			if (eNode.succs.size()>0) {existingMatchDist2+=eNode.nextNodeDist.get(eNode.succs.get(0));}
-		}
-		double finalScore = mergeScoreTotal -  matchScoreWeighting*(mergeMatch1 - existingMatchDist1 + mergeMatch2 - existingMatchDist2);
-		// test - temp
-		//ArrayList<Integer> tr1_ts = tr1.times(); ArrayList<Integer> tr2_ts = tr2.times();
-		//System.out.println("track intervals " + tr1_ts.get(0) +" - " + tr1_ts.get(tr1_ts.size()-1)  + ", "+ tr2_ts.get(0) +" - " + tr2_ts.get(tr2_ts.size()-1));
-		//System.out.println(mergeScoreTotal+" - "+ matchScoreWeighting +"*( "+ mergeMatch1+"+"+mergeMatch2 +"-"+ existingMatchDists+") = "+  (mergeScoreTotal -  matchScoreWeighting*(mergeMatch1 + mergeMatch2 - existingMatchDists))  );		
-		
-		// looking at possible extensions
-		// println("Looking for extensions: current tracks"); for (Track tr:tracks) {println(tr.endTimes()[0]+"-"+tr.endTimes()[1]);}
-		for (boolean forward : new boolean[] {false,true}) {
-			int tStep = forward ? 1 : -1;
-			// println("Common time "+firstCommonTime+"-"+lastCommonTime+"; "+ (forward?"forward ":"backward ")+","+tStep);
-			while (finalScore<0 && mergeScoreTotal>0) {
-				// try possible extensions to tracks that give better matches
-				Track continuingTrack = null;
-				Track terminatingTrack = null;
-				int endTime = forward ? lastCommonTime : firstCommonTime;
-				for (Track tr : tracks) {
-					if (tr.nodesByTime.containsKey(endTime+tStep)) {
-						assert(continuingTrack == null);
-						continuingTrack = tr;
-					} else if (tr.nodesByTime.containsKey(endTime)) {
-						terminatingTrack = tr;
-					}
-				}
-				if (continuingTrack == null) {break;}
-				if (terminatingTrack==null) {
-					println("Terminating track calculation failed");
-					for (Track tr:tracks) {println(tr.endTimes()[0]+"-"+tr.endTimes()[1]);}
-					println("Common time "+firstCommonTime+"-"+lastCommonTime+"; "+ (forward?"forward ":"backward ")+endTime+","+tStep);
-					try {
-						throw new Exception("Terminating track is null!"); //IllegalAccessException
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-				}
-				ArrayList<Track> adTracks = continuingTrack.adjacentTracks();
-				boolean addedNewTrack=false;
-				for (Track tryTrack : adTracks) {
-					if (tryTrack.nodesByTime.containsKey(endTime) || !tryTrack.nodesByTime.containsKey(endTime+tStep)) {continue;}
-					double trialMatchDistAdjustment = mergedMatchDist(new Track[] {continuingTrack,terminatingTrack,tryTrack},endTime,endTime+tStep,logSizeWeight) 
-							- mergedMatchDist(new Track[] {continuingTrack,terminatingTrack},endTime,endTime+tStep,logSizeWeight);
-					if (trialMatchDistAdjustment>0) {continue;}
-					double newMergeScoreSum=0;
-					int ts = endTime+tStep;
-					while (continuingTrack.nodesByTime.containsKey(ts) && tryTrack.nodesByTime.containsKey(ts) ) {
-						
-						newMergeScoreSum += nodeMergeScore(continuingTrack.nodesByTime.get(ts),tryTrack.nodesByTime.get(ts),
-								relativeNodeContact_referenceValue,relativeNodeDistance_referenceValue,relativeNodeContact_weight,relativeNodeDistance_weight)-1;
-						ts+=tStep;
-					}
-					if (newMergeScoreSum<0) {continue;}
-					
-					double newEndTrialMatchDist = mergedMatchDist(new Track[] {continuingTrack,tryTrack},ts,ts-tStep,logSizeWeight) ;
-					double newEndCurrentMatchDist = mergedMatchDist(new Track[] {continuingTrack},ts,ts-tStep,logSizeWeight) + mergedMatchDist(new Track[] {tryTrack},ts,ts-tStep,logSizeWeight) ;
-					// if (newEndTrialMatchDist > matchThreshold) {continue;}
-					// Finally ready to commit to tryTrack
-					tracks.add(tryTrack);
-					
-					mergeScoreTotal += newMergeScoreSum;
-					println("Added merge from "+endTime+" to " + ts+";"+tStep);
-					if (forward) {
-						println("lastCommonTime: " + lastCommonTime + "->" + (ts-1));
-						lastCommonTime = ts - 1;
-						mergeMatch2 += trialMatchDistAdjustment + newEndTrialMatchDist;
-						existingMatchDist2 += newEndCurrentMatchDist;
-					} else {
-						println("firstCommonTime: " + firstCommonTime + "->" + (ts+1));
-						firstCommonTime = ts +1;
-						mergeMatch1 += trialMatchDistAdjustment + newEndTrialMatchDist;
-						existingMatchDist1 += newEndCurrentMatchDist;
-					}
-					finalScore = mergeScoreTotal -  matchScoreWeighting*(mergeMatch1 - existingMatchDist1 + mergeMatch2 - existingMatchDist2);
-					addedNewTrack=true;
-					break;
-				}
-				if (!addedNewTrack) {break;}
-			}
-		}
-		
-		
-		if (finalScore==Double.POSITIVE_INFINITY) {
-			for (Track tr : tracks)
-				tr.printNodeTable();
-			if (haltOnInfiniteScore) {
-			try {
-				
-				throw new IllegalAccessException("trackMergeScore gave an infinite value! Tracks equal: "+ (tracks.get(0)==tracks.get(1))); //  nds1.size()+","+nds2.size()+", matched pair " + x + ","+y+"!");
-            } catch (IllegalAccessException ex) {
-                System.err.println(ex);
-                System.exit(1);
-            }
-			} else {
-				println("trackMergeScore gave an infinite value! Tracks equal: "+ (tracks.get(0)==tracks.get(1)));
-			}
-		}
-		return new double[] {finalScore,mergeScoreTotal};
-	}
-	
-	// get an overall score for merging 2 tracks by combining nodeMergeScore results on common times with change to match distance penalties
-		// 0 = neutral, higher is evidence for merging
-		public static double[] trackMergeScoreOld(Track tr1, Track tr2, double relativeNodeContact_referenceValue, double relativeNodeDistance_referenceValue, double relativeNodeContact_weight, double relativeNodeDistance_weight,
-				double logSizeWeight, double matchThreshold, double matchScoreWeighting) {
-			//int commonTimeStepCount=0; // needed?
-			double mergeScoreTotal=0;
-			int firstCommonTime = Integer.MAX_VALUE;
-			int lastCommonTime = Integer.MIN_VALUE;
-			for (int ts : tr1.times()) {
-				if (!tr2.nodesByTime.containsKey(ts)) {continue;}
-				//commonTimeStepCount++;
-				mergeScoreTotal+=nodeMergeScore(tr1.nodesByTime.get(ts),tr2.nodesByTime.get(ts),relativeNodeContact_referenceValue,relativeNodeDistance_referenceValue,relativeNodeContact_weight,relativeNodeDistance_weight)-1;
-				if (ts<firstCommonTime) {firstCommonTime=ts;}
-				if (ts>lastCommonTime) {lastCommonTime=ts;}
-				// test - temp
-//				if (ts==204) {
-//					System.out.println(" dist/contact " +  relativeNodeCloseness(tr1.nodesByTime.get(ts),tr2.nodesByTime.get(ts)) +"/"+ relativeNodeContact(tr1.nodesByTime.get(ts),tr2.nodesByTime.get(ts)) + 
-//							"; ref values " + relativeNodeDistance_referenceValue + "/"+relativeNodeContact_referenceValue + "; weights " + relativeNodeDistance_weight+"/"+relativeNodeContact_weight);
-//				}
-			}
-			
-			
-			// now penalise score by change in total match distance, weighted by matchScoreWeighting; return -inf (always reject) if a new match exceeds threshold
-			double mergeMatch1 = mergedMatchDist(tr1,tr2,firstCommonTime-1,firstCommonTime,logSizeWeight);
-			double mergeMatch2 = mergedMatchDist(tr1,tr2,lastCommonTime,lastCommonTime+1,logSizeWeight);
-			if (mergeMatch1>matchThreshold || mergeMatch2>matchThreshold ) {return new double[] {Double.NEGATIVE_INFINITY,mergeScoreTotal};}
-			double existingMatchDists = 0;
-			for (Track tr : new Track[] {tr1,tr2}) {
-				Node eNode = tr.nodesByTime.get(firstCommonTime);
-				if (eNode.preds.size()>0) {existingMatchDists+=eNode.nextNodeDist.get(eNode.preds.get(0));}
-				eNode = tr.nodesByTime.get(lastCommonTime);
-				if (eNode.succs.size()>0) {existingMatchDists+=eNode.nextNodeDist.get(eNode.succs.get(0));}
-			}
-			
-			
-			double finalScore = mergeScoreTotal -  matchScoreWeighting*(mergeMatch1 + mergeMatch2 - existingMatchDists);
-			// ArrayList<Integer> tr1_ts = tr1.times(); ArrayList<Integer> tr2_ts = tr2.times();
-			//System.out.println("track intervals " + tr1_ts.get(0) +" - " + tr1_ts.get(tr1_ts.size()-1)  + ", "+ tr2_ts.get(0) +" - " + tr2_ts.get(tr2_ts.size()-1));
-			//System.out.println(mergeScoreTotal+" - "+ matchScoreWeighting +"*( "+ mergeMatch1+"+"+mergeMatch2 +"-"+ existingMatchDists+") = "+  (mergeScoreTotal -  matchScoreWeighting*(mergeMatch1 + mergeMatch2 - existingMatchDists))  );		
-			if (finalScore==Double.POSITIVE_INFINITY) {
-				try {
-					tr1.printNodeTable();
-					tr2.printNodeTable();
-					throw new IllegalAccessException("trackMergeScore gave an infinite value! Tracks equal: "+ (tr1==tr2)); //  nds1.size()+","+nds2.size()+", matched pair " + x + ","+y+"!");
-	            } catch (IllegalAccessException ex) {
-	                System.err.println(ex);
-	                System.exit(1);
-	            }
-			}
-			return new double[] {finalScore,mergeScoreTotal};
-		}
 	
 		// similar to mergedMatchDist, but specific setup, tracks are not merged at firstTimeApart even if both still exists
 	private static double matchDistAdjustment(Track tr1, Track tr2, int lastMergeTime, int firstTimeApart, double logSizeWeight, double matchDistanceMaximum) {
@@ -611,47 +439,12 @@ public class TrackAndNodeOperations {
 		if (continuingTrackCount>1) {newMatchDistance+=matchDistanceMaximum;}
 		return newMatchDistance - currentMatchDistance;
 	}
-//	private static double matchDistAdjustment(Track continuingTrack, Track tr1, Track tr2, int t1, int t2, double logSizeWeight, double matchDistanceMaximum) {
-//		return matchDistance(new Node(continuingTrack.nodesByTime.get(t1),tr1.nodesByTime.get(t1)),new Node(continuingTrack.nodesByTime.get(t2),tr2.nodesByTime.get(t2)),logSizeWeight) - 
-//				matchDistance(continuingTrack.nodesByTime.get(t1),continuingTrack.nodesByTime.get(t2),logSizeWeight);
-//	}
+
 	
-		
-	// depracate mergedMatchDist - trying for clearer approach
-	// note that mergedMatchDist doesn't not have matchDistanceMaximum 
-	private static double mergedMatchDist(Track tr1, Track tr2,int t1, int t2, double logSizeWeight) {
-		Node[] ndPr = new Node[] {null,null};
-		int[] tms = new int[] {t1,t2};
-		for (int i=0;i<2;i++) {
-			if (tr1.nodesByTime.containsKey(tms[i])) {ndPr[i]=tr1.nodesByTime.get(tms[i]);}
-			if (tr2.nodesByTime.containsKey(tms[i])) {
-				ndPr[i]=ndPr[i]==null ? tr2.nodesByTime.get(tms[i]) :  new Node(ndPr[i],tr2.nodesByTime.get(tms[i]));
-			}
-		}
-		if (ndPr[0]==null || ndPr[1]==null) {return  0.0;}
-		return matchDistance(ndPr[0],ndPr[1],logSizeWeight);	
-	}
-	
-	private static double mergedMatchDist(Track[] tracks,int t1, int t2, double logSizeWeight) {
-		Node[] ndPr = new Node[] {null,null};
-		int[] tms = new int[] {t1,t2};
-		for (int i=0;i<2;i++) {
-			for (Track tr : tracks) {
-				if (tr==null) {
-					println("Track is null! Number tracks in set is "+tracks.length);
-				}
-				if (tr.nodesByTime.containsKey(tms[i])) {
-					ndPr[i]=ndPr[i]==null ? tr.nodesByTime.get(tms[i]) :  new Node(ndPr[i],tr.nodesByTime.get(tms[i]));
-				}
-			}
-		}
-		if (ndPr[0]==null || ndPr[1]==null) {return  0.0;}
-		return matchDistance(ndPr[0],ndPr[1],logSizeWeight);
-	}
-	
-	
+
 	// method supports node merging on common timesteps, or just lengthwise joining
-	//	although I return a new track, this is a destructive process: first track has nodes merged (if times overlap), and adjacency information changed in other nodes as part of this node merge
+	//	although I return a new track, this is a destructive process: first track has nodes merged (if times overlap), 
+	// and adjacency information changed in other nodes as part of this node merge.
 	// so not suitable for backtracking (need to rethink a little if I want to do that)
 	// note that preds/succs info in each node is wiped, replaced by pred/succ node in track
 	static Track addTracks(Track tr1, Track tr2,double logSizeWeight) {

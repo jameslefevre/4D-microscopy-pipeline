@@ -15,11 +15,7 @@ import ij.plugin.Duplicator;
 import ij.plugin.ImageCalculator;
 import static segImAnalysis.Util.println;
 
-/**
- * 
- * @author James Lefevre
- *
- */
+
 public class SegmentedImageAnalysis {
 
 	public static void splitObjectAnalysis(

@@ -14,18 +14,18 @@ import ij.measure.ResultsTable;
 import sc.fiji.skeletonize3D.Skeletonize3D_;
 
 //import segImAnalysis.Skeletonise3D_jl;
-
 // import org.apache.commons.math3.linear; //.EigenDecomposition;
 
+@SuppressWarnings("unused")
 public class TestsAndSmallJobs {
 	
 	static String imFolder = "/home/james/image_data/LLS/feature_stacks_and_processed_images/classified_images/r2_150202_3_d10_all16_rf/";
+	
 	
 	public static void main(String[] args) throws IOException {
 		
 		testMedialSurfaceAlgorithm("/data/james/image_data/LLS/20190830_LLSM_Yvette/20190830_pos4/medial_surface_test_stack1/c1-t001-et0000000_decon_seg_d19_rep1ds1gd_rf.tif",
 				"/data/james/image_data/LLS/20190830_LLSM_Yvette/20190830_pos4/medial_surface_test_stack1/med_surfaces_cells.tif");
-		
 		
 		
 		// System.out.println("hi world");

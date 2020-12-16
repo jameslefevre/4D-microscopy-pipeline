@@ -4,11 +4,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 
+/**
+ * Represents a simple track consisting of one Node per time.
+ * (although Nodes have capacity to record more than one pre/succ)
+ */
 public class Track {
-	// represents a simple class - one node per time - although nodes have capacity to record more than one pre/succ
 	int id=-1;
 	int classId=-1;
-	//ArrayList<Node> nodes = new ArrayList<Node>();
 	HashMap<Integer,Node> nodesByTime = new HashMap<Integer,Node>();
 	ArrayList<TrackSetMergeScore> mergeScores = new ArrayList<TrackSetMergeScore>(); // TrackPairMergeScore
 	Track(){}
@@ -65,11 +67,15 @@ public class Track {
 			System.out.println(nodesByTime.get(ts).toTableRow());
 		}
 	}
-	
-
 
 }
 
+/**
+ * Used to record the results after scoring 
+ * a possible merging of two tracks.
+ * Keeps tabs on the two tracks plus any other tracks 
+ * that got pulled in, any cuts etc, as well as the calculated score.
+ */
 class TrackSetMergeScore{
 	double score;
 	int firstMergeTime;
@@ -86,38 +92,5 @@ class TrackSetMergeScore{
 		tracksCutAtStart=tracksCutAtStart_;
 		tracksCutAtEnd=tracksCutAtEnd_;
 	}
-	
-	// depracated
-	TrackSetMergeScore(double[] final_and_unadjusted_score_,ArrayList<Track> tracks_){
-		score=final_and_unadjusted_score_[0];
-		//unadjusted=final_and_unadjusted_score_[1];
-		tracks=tracks_;
-	}
 }
 
-// not sure if ordering works; sort was failing, then I realised it would be quicker just to run through and pick the max on each iteration of merging algorithm
-//class TrackPairMergeScore implements Comparable<TrackPairMergeScore>{
-//	double score;
-//	double unadjusted;
-//	Track track1;
-//	Track track2;
-//	TrackPairMergeScore(double[] final_and_unadjusted_score_,Track tr1,Track tr2){
-//		score=final_and_unadjusted_score_[0];
-//		unadjusted=final_and_unadjusted_score_[1];
-//		track1=tr1;
-//		track2=tr2;
-//	}
-//	@Override
-//    public int compareTo(TrackPairMergeScore compareTo) {
-//		// if (this.score==Double.POSITIVE_INFINITY)
-//		if ((this.score - compareTo.score) < .00000000001)
-//        return 0;
-//    if (this.score > compareTo.score)
-//        return -1;
-//    else if (this.score < compareTo.score)
-//        return 1;
-//    return 0;
-//    
-//		//return (int) Math.ceil(compareTo.score - score);
-//    }
-//}

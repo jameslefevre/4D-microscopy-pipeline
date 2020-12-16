@@ -4,10 +4,10 @@ import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-// from https://github.com/aalmi/HungarianAlgorithm
-// not sure if I can use this - matrices not square in general, and not all match
-// but could pad, solve, then prune
-// also need to convert costs (distance) to double
+// From https://github.com/aalmi/HungarianAlgorithm
+// This expects square matrices and a complete matching.
+// I adapt to a partial matching of unequal sets by 
+// padding with dummy objects and truncating distances above max value
 
 /**
  * An implemetation of the Kuhn–Munkres assignment algorithm of the year 1957.

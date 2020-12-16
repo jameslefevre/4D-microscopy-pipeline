@@ -65,6 +65,13 @@ public class Node {
 	
 	Node(){}
 	
+	/**
+	 * Construct a Node from tabular data.
+	 * 
+	 * @param rt		A table of data in which each row contains the data for a node, except for time step (expects that the table corresponds to a single time step).
+	 * @param rowNum	The row number to use to construct this node
+	 * @param timeStep_ The time step for the node.
+	 */
 	Node(ResultsTable rt, int rowNum, int timeStep_){
 		objectIds.add((int) Math.round(rt.getValue("id", rowNum)));		
 		classId = (int) Math.round(rt.getValue("class", rowNum));
@@ -102,32 +109,16 @@ public class Node {
 		}		
 	}
 	
-//	public Node deepCopy() {
-//		Node nd = new Node();
-//		nd.id = id;
-//		nd.classId = classId;
-//		nd.timeStep = timeStep;
-//		nd.track = track;
-//		nd.objectIds = new ArrayList<Integer>(objectIds);
-//		nd.position = position.clone();
-//		nd.voxels = voxels;
-//		nd.signalIntensity = signalIntensity;
-//		nd.channelMean = channelMean;
-//		nd.classProbs = classProbs.clone();
-//		nd.voxelVolume = voxelVolume;
-//		nd.preds = new ArrayList<Node>(preds);
-//		nd.succs = new ArrayList<Node>(succs);
-//		nd.nextNodeDist = new HashMap<Node,Double>();
-//		for (Node nd2 : nextNodeDist.keySet()) {nd.nextNodeDist.put(nd2, nextNodeDist.get(nd2));}
-//		nd.adjacencies = new HashMap<Node,Integer>();
-//		for (Node nd2 : adjacencies.keySet()) {nd.adjacencies.put(nd2, adjacencies.get(nd2));}
-//		nd.branchOrEnd = branchOrEnd;	
-//		return nd;
-//	}
 	
-	
-	// create sum of 2 nodes with context stripped out and no side effects, used to check match score after possible merging; not to be confused with mergeNode (permanent and with side effects)
-	// need to include any properties used to match nodes (and no other)
+	// 
+	/**
+	 * Create sum of 2 nodes with context stripped out and no side effects, used to check match score after possible merging; 
+	 * not to be confused with mergeNode (permanent and with side effects)
+	 * need to include any properties used to match nodes (and no others).
+	 * 
+	 * @param nd1
+	 * @param nd2
+	 */
 	Node(Node nd1, Node nd2){
 		voxels = nd1.voxels+nd2.voxels;	
 		for (int i=0;i<3;i++) {
@@ -152,13 +143,23 @@ public class Node {
 		positionCov[4] = positionCov[4]*sf[0]*sf[2];
 		positionCov[5] = positionCov[5]*sf[1]*sf[2];
 		voxelVolume = sf[0]*sf[1]*sf[2];
-		//tn.voxelVolume=voxelVolume;
-
 	}
+	
+	
+	/**
+	 * Permanently merge a Node into this one, with side effects: 
+	 * Adjacency information is updated for adjacent Nodes
+	 * Includes calculations for correctly combining various metrics.
+	 * <p>
+	 * succs, preds, nextNodeDist cannot be handled correctly without 
+	 * additional information (logSizeWeight parameter, threshold, 
+	 * possible consideration of other nodes), so these are not valid 
+	 * for merged Node.
+	 * 
+	 * @param nd Node to be merged into this one.
+	 */
 
 	public void mergeNode(Node nd) {
-		// succs, preds,nextNodeDist cannot be done correctly without logSizeWeight parameter, threshold, possible consideration of other nodes ... not entirely obvious what we want
-		// For now set them to empty, to be safe
 		if (nd.timeStep != timeStep) {
 			 try {
 	                throw new IllegalAccessException("Nodes must have same time step to merge - have "+timeStep+", "+nd.timeStep);

@@ -9,86 +9,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 public class Tracking {
-	public static void main(String[] args) throws IOException {
-		//if (true) {return;}
-		generateSaveTracks(
-				
-				//"/home/james/image_data/visualiser/20190830_pos4/d19_intAdj_rep1ds1gd_rf/objectAnalysis2/",
-				//"/home/james/image_data/visualiser/20190830_pos4/d19_intAdj_rep1ds1gd_rf/objectAnalysis2/trackNodeTable11.csv",
-				//"/home/james/image_data/visualiser/20190830_pre4/d19_intAdj_rep1ds1gd_rf/objectAnalysis2/",
-				//"/home/james/image_data/visualiser/20190830_pre4/d19_intAdj_rep1ds1gd_rf/objectAnalysis2/trackNodeTable11.csv",
-				//"/home/james/image_data/visualiser/20190830_pre2/d19_intAdj_rep1ds1gd_rf/objectAnalysis2/",
-				//"/home/james/image_data/visualiser/20190830_pre2/d19_intAdj_rep1ds1gd_rf/objectAnalysis2/trackNodeTable_test.csv",
-				"/home/james/image_data/visualiser/20190917_pos2/d19_intAdj_rep1ds1gd_rf/objectAnalysis2/",
-				"/home/james/image_data/visualiser/20190917_pos2/d19_intAdj_rep1ds1gd_rf/objectAnalysis2/tt_test1.csv",
-				// timeSteps_specified , breakPoints
-				null, null, 
-				//new int[]{47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67}, null, 
-				//*** useAlphabeticalPositionForStackNumber
-				false,
-				//*** stackNumPrefix
-				"-t",
-				//*** stackNumberSuffix
-				"-e",
-				//*** trackedClasses
-				//new int[]{1}, 
-				new int[]{1,2,3,4}, 
-				//*** voxelThresholds
-				//new int[]{5000,75,500,500}, // numbers I've been using for a while up to 20191031, when I changed to 2 stage filter
-				new int[]{2000,30,200,200}, 
-				//*** voxelThresholdsTracks
-				//new int[]{10000,150,1000,1000},
-				//*** fieldScaling - applied at data load // old z = 2.17
-				new double[]{1.04,1.04,2.68}, 
-				//*** logSizeWeight
-				new double[]{90,22,22,22}, // was 22 for all
-				//*** matchThreshold
-				new double[]{120,20,20,20}, //{35,20,20,20}
-				//*** double[] relativeNodeContact_referenceValue, 
-				new double[]{0.06,0.02,0.04,0.04},
-				//*** double[] relativeNodeDistance_referenceValue, 
-				new double[]{0.7,0.5,0.8,0.8},
-				//*** double[] relativeNodeContact_weight,
-				new double[]{0.66,0.66,0.66,0.66},
-				//*** double[] matchScoreWeighting,\
-				//new double[]{1,1,1,1},
-				new double[]{0.35,0.25,0.25,0.25},
-				
-              //*** verbose,
-              false
-				);
-		
-	// test
-//	generateSaveTracks(
-//			"/home/james/image_data/visualiser/20190830_pos4/d19_intAdj_rep1ds1gd_rf/objectAnalysis/",
-//			"/home/james/image_data/visualiser/20190830_pos4/d19_intAdj_rep1ds1gd_rf/objectAnalysis/trackNodeTable_temp.csv",
-//			// timeSteps_specified , breakPoints
-//			//new int[]{9,10,11}, null, 
-//			new int[]{1,2,3}, null, 
-//			//*** useAlphabeticalPositionForStackNumber
-//			false,
-//			//*** stackNumPadLength
-//			3,
-//			//*** stackNumPrefix
-//			"-t",
-//			//*** trackedClasses
-//			new int[]{1}, 
-//			//*** voxelThresholds
-//			new int[]{5000,75,500,500}, 
-//			//*** fieldScaling - applied at data load // old z = 2.17
-//			new double[]{1.04,1.04,2.68,1}, 
-//			//*** logSizeWeight
-//			22,
-//			//*** matchThreshold
-//			new double[]{35,20,20,20},
-//			true
-//			);
-}
 
 	// objectData structure is class:{timeStep:{id:{x,y,z,size}}}
 	// allClassAdjacencies structure is timeStep:{[][id1,id2,connectionSize]} ; 
-	
-	// public static void test
 	
 	
 	//*** removePlateAdjacentObjectsParams; has not been implemented for rewrite of tracking code; following notes describe how it used to work (and might again)
@@ -150,8 +73,6 @@ public class Tracking {
 		for (int classIndex=0; classIndex<trackedClasses.length; classIndex++) {		
 			int classNum = trackedClasses[classIndex];
 			println("Generating tracks for class " + classNum + " " + new Timestamp(System.currentTimeMillis()));
-			//ArrayList<Double> allMatchDists = new ArrayList<Double>();
-			//matchDistsByClass.put(classNum, allMatchDists);
 			
 			ArrayList<Track> classTracks = new ArrayList<Track>();
 			for (int timeBlock = 0; timeBlock<timeBlockCount ; timeBlock++) {
