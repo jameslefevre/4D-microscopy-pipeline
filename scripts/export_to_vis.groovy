@@ -1,6 +1,4 @@
 
-// TODO:  finish and test this doc; see old versions up to 6
-
 /**
  * 
  * Bulk copy and convert image data to a form suitable for custom visualiser tool.
@@ -193,6 +191,7 @@ if (convertRawSegProb[2]){
 	}
 }
 println("done")
+System.exit(0);
 
 Map getFileNames(String folderPath, String stackNumberPrefix, String stackNumberSuffix, int[] stackNums){
 	println(folderPath)
@@ -212,12 +211,15 @@ Map getFileNames(String folderPath, String stackNumberPrefix, String stackNumber
 	
 		// extract stack number
 		splt_fn = fn.split(stackNumberPrefix)
+		//println(splt_fn.size())
 		if (splt_fn.size()<2){continue}
 		part_fn = splt_fn[1]
 		splt_fn = part_fn.split(stackNumberSuffix)
+		//println(splt_fn.size())
 		if (splt_fn.size()<2){continue}
+		//println(splt_fn[0])
 		int stNum = splt_fn[0].toInteger();
-		// println(stNum)
+		//println(stNum)
 	
 		if (stackNums.contains(stNum)){
 			//nameSet.add(fn);

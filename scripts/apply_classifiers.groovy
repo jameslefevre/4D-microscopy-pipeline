@@ -116,7 +116,7 @@ model_features = ResultsTable.open(feature_model_table);
 
 println();
 classifyStart = new Date(); println("Applying model " + modelName + ".tif  " + sdf.format(classifyStart));
-segmentator.loadClassifier(modelPath + modelName] + ".model");
+segmentator.loadClassifier(modelPath + modelName + ".model");
 
 ArrayList<String> featureList = new ArrayList<String>()
 ArrayList<Boolean> featureDerived = new ArrayList<String>()
@@ -153,7 +153,15 @@ if (probMaps){
 		probImage = new CompositeImage(probImage)
 	}
 		
-	IJ.run(probImage,"Multiply...", "value=255 stack");
+	// IJ.run(probImage,"Multiply...", "value=255 stack");
+	ImageStack imSt = probImage.getStack();
+	int width=imSt.getWidth();int height=imSt.getHeight();int slices=imSt.getSize();
+		for (int x=0;x<width;x++) {for (int y=0;y<height;y++) {for (int z=0;z<slices;z++) {
+			double v = imSt.getVoxel(x,y,z);
+			imSt.setVoxel(x,y,z,v*255.0);
+		}}}
+	probImage.setStack(imSt);
+		
     IJ.run("Conversions...", " ");
     IJ.run(probImage, "8-bit", "");
     IJ.run("Conversions...", "scale");
@@ -216,4 +224,4 @@ if (!save_worked){
 classifyEnd = new Date();
 float durationMinutes = TimeCategory.minus( classifyEnd, classifyStart ).toMilliseconds()/60000
 println("Image " + imageStackName + " segmented using model " + modelName + " in " + durationMinutes + " minutes (includes prob map if produced)")
-
+System.exit(0);

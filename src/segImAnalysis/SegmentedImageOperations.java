@@ -20,7 +20,15 @@ public class SegmentedImageOperations {
 		selectChannel(im, pixelValue, 255);
 	}
 	public static void selectChannel(ImagePlus im, int pixelValue, int saveValueForChannel){
-		IJ.run(im, "Macro...", "code=v=" + saveValueForChannel + "*(v==" + pixelValue + ") stack");
+		//IJ.run(im, "Macro...", "code=v=" + saveValueForChannel + "*(v==" + pixelValue + ") stack");
+		ImageStack imSt = im.getStack();
+		int width=imSt.getWidth();int height=imSt.getHeight();int slices=imSt.getSize();
+		for (int x=0;x<width;x++) {for (int y=0;y<height;y++) {for (int z=0;z<slices;z++) {
+			double v = imSt.getVoxel(x,y,z);
+			imSt.setVoxel(x,y,z,v==pixelValue ? saveValueForChannel : 0 );
+		}}}
+		im.setStack(imSt);
+
 		IJ.run(im, "Grays", ""); // had issue with LUT inherited from original image which mapped 0 and classNumber to 0 ... 
 		// when converting from 8-bit color to 8-bit, it appears that conversion will be via LUT even given following option
 		IJ.run("Conversions...", " ");

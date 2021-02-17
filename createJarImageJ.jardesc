@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <jardesc>
     <jar path="/home/james/software/Fiji.app/jars/Segmented_Image_Analysis.jar"/>
-    <options buildIfNeeded="true" compress="true" descriptionLocation="/Segmented_Image_Analysis/createJarImageJ.jardesc" exportErrors="true" exportWarnings="true" includeDirectoryEntries="false" overwrite="false" saveDescription="true" storeRefactorings="false" useSourceFolders="false"/>
+    <options buildIfNeeded="true" compress="true" descriptionLocation="/4D-microscopy-pipeline/createJarImageJ.jardesc" exportErrors="true" exportWarnings="true" includeDirectoryEntries="false" overwrite="false" saveDescription="true" storeRefactorings="false" useSourceFolders="false"/>
     <storedRefactorings deprecationInfo="true" structuralOnly="false"/>
     <selectedProjects/>
     <manifest generateManifest="true" manifestLocation="" manifestVersion="1.0" reuseManifest="false" saveManifest="false" usesManifest="true">
@@ -11,9 +11,6 @@
         </sealing>
     </manifest>
     <selectedElements exportClassFiles="false" exportJavaFiles="false" exportOutputFolder="true">
-        <javaElement handleIdentifier="=Segmented_Image_Analysis/src&lt;segImAnalysis"/>
-        <javaElement handleIdentifier="=Segmented_Image_Analysis/src&lt;"/>
-        <file path="/Segmented_Image_Analysis/.classpath"/>
-        <file path="/Segmented_Image_Analysis/.project"/>
+        <javaElement handleIdentifier="=4D-microscopy-pipeline"/>
     </selectedElements>
 </jardesc>

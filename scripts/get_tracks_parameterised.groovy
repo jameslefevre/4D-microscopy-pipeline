@@ -146,6 +146,8 @@
 
 
 import objectTracking.Tracking;
+import java.io.File;
+import java.text.SimpleDateFormat
 
 Tracking.generateSaveTracks(
 				main_path,
@@ -166,5 +168,38 @@ Tracking.generateSaveTracks(
 				matchScoreWeighting,
 				verbose
 				);
+
+/* This is currently done in Java code, so not needed
+ * 
+ * 
+File file = new File(save_path + ".log")
+FileWriter writer = new FileWriter(file)
+
+sdf = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss")
+
+writer.write("   Track output written at " + sdf.format(new Date()) + "\n\n");
+
+
+writer.write("main_path: " + main_path + "\n");
+writer.write("save_path: " + save_path + "\n");
+writer.write("timeSteps_specified: " + timeSteps_specified + "\n");
+writer.write("breakPoints: " + breakPoints + "\n");
+writer.write("useAlphabeticalPositionForStackNumber: " + useAlphabeticalPositionForStackNumber + "\n");
+writer.write("stackNumPrefix: " + stackNumPrefix + "\n");
+writer.write("stackNumSuffix: " + stackNumSuffix + "\n");
+writer.write("trackedClasses: " + trackedClasses + "\n");
+writer.write("voxelThresholds: " + voxelThresholds + "\n");
+writer.write("fieldScaling: " + fieldScaling + "\n");
+writer.write("logSizeWeight: " + logSizeWeight + "\n");
+writer.write("matchThreshold: " + matchThreshold + "\n");
+writer.write("relativeNodeContact_referenceValue: " + relativeNodeContact_referenceValue + "\n");
+writer.write("relativeNodeDistance_referenceValue: " + relativeNodeDistance_referenceValue + "\n");
+writer.write("relativeNodeContact_weight: " + relativeNodeContact_weight + "\n");
+writer.write("matchScoreWeighting: " + matchScoreWeighting + "\n");
+writer.write("verbose: " + verbose + "\n");
+
+writer.close()
+*/
 		
-		println("done");
+println("done");
+System.exit(0);

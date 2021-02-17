@@ -1,25 +1,25 @@
-TODO - start only
-need to set up parameterised get_tracks.groovy
-
-
 #!/bin/bash
 
-echo "starting get_tracks script"
-/home/james/software/Fiji.app/ImageJ-linux64 --ij2 --headless --allow-multiple --run /home/james/work/eclipse-workspace/Segmented_Image_Analysis/src/scripts/export_to_vis.groovy \
-'deconvFolder = "/home/james/mnt/rdm_adam/MachineLearning_ARC_Grant_work/20190809/Pre1/Decon_output/",'\
-'segFolder = "/home/james/mnt/rdm_adam/MachineLearning_ARC_Grant_work/20190809/Pre1/segmentation/",'\
-'saveFolder = "/home/james/image_data/visualiser/20190809_pre1/",'\
-'modelName = "d18_rep1ds1gd_rf",'\
-'segName = "d18_intAdj_rep1ds1gd_rf",'\
-'stackNums = "1..10",'\
-'stackNumberPrefix = "-t",'\
-'stackNumberSuffix = "-e",'\
-'convertRawSegProb = "[false,true,true]",'\
-'cropRawSegProb = "[true,false,false]",'\
-'cropBox = "[[154,796],[252,1022],[0,147]]",'\
-'intensityRange = "[0,3349]",'\
-'channelSelection = "[3,2,4]"'\
-> get_tracks.log
+echo "starting script get_tracks"
+./Fiji.app/ImageJ-linux64 --ij2 --headless --allow-multiple --run ./code/get_tracks_parameterised.groovy \
+"main_path='outputs/Segmentation/objectAnalysis/',"\
+"save_path='outputs/Segmentation/objectAnalysis/trackNodeTable.csv',"\
+"timeSteps_specified=[],"\
+"breakPoints=[],"\
+"useAlphabeticalPositionForStackNumber='false',"\
+"stackNumPrefix='-t',"\
+"stackNumSuffix='-e',"\
+"fieldScaling=[1.04,1.04,2.68],"\
+"trackedClasses=[1,2,3,4],"\
+"voxelThresholds=[2000,30,200,200],"\
+"logSizeWeight=[90,22,22,22],"\
+"matchThreshold=[120,20,20,20],"\
+"relativeNodeContact_referenceValue=[0.06,0.02,0.04,0.04],"\
+"relativeNodeDistance_referenceValue=[0.7,0.5,0.8,0.8],"\
+"relativeNodeContact_weight=[0.66,0.66,0.66,0.66],"\
+"matchScoreWeighting=[0.35,0.25,0.25,0.25],"\
+"verbose='true'"\
+> tracks.log
 
 echo "finished get_tracks job script"
 exit

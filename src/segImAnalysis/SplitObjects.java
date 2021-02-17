@@ -34,7 +34,16 @@ public class SplitObjects {
 	public static ImagePlus watershedSplit(ImagePlus objectSplitSignal, ImagePlus mask,  int dynamic, int minVoxExtraObjects) {
 		
 		ImagePlus msk = mask.duplicate();
-		IJ.run(msk, "Macro...", "code=v=1*(v>0) stack");
+		
+		//IJ.run(msk, "Macro...", "code=v=1*(v>0) stack");
+		ImageStack imSt = msk.getStack();
+		int width=imSt.getWidth();int height=imSt.getHeight();int slices=imSt.getSize();
+		for (int x=0;x<width;x++) {for (int y=0;y<height;y++) {for (int z=0;z<slices;z++) {
+			double v = imSt.getVoxel(x,y,z);
+			imSt.setVoxel(x,y,z,v>0 ? 1 : 0 );
+		}}}
+		msk.setStack(imSt);
+		
 		ImageCalculator ic = new ImageCalculator();
 		ImagePlus spt = ic.run("Multiply create stack", objectSplitSignal, msk);
 		ImageStack image = spt.getStack();

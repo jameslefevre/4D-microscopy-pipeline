@@ -5,7 +5,7 @@ echo "starting export_to_vis script"
 'imageFolder = "/home/james/mnt/rdm_adam/MachineLearning_ARC_Grant_work/20190809/Pre1/Decon_output/",'\
 'segFolder = "/home/james/mnt/rdm_adam/MachineLearning_ARC_Grant_work/20190809/Pre1/segmentation/d18_intAdj_rep1ds1gd_rf/segmented/",'\
 'probMapFolder = "/home/james/mnt/rdm_adam/MachineLearning_ARC_Grant_work/20190809/Pre1/segmentation/d18_intAdj_rep1ds1gd_rf/probability_maps/",'\
-'imageSaveFolder = "/home/james/image_data/visualiser/20190809_pre1/deconv/",'\
+'imageSaveFolder = "/home/james/image_data/visualiser/20190809_pre1/deconv_test/",'\
 'segSaveFolder = "/home/james/image_data/visualiser/20190809_pre1/d18_intAdj_rep1ds1gd_rf/segmented/",'\
 'probMapSaveFolder = "/home/james/image_data/visualiser/20190809_pre1/d18_intAdj_rep1ds1gd_rf/probability_maps/",'\
 'alwaysSaveWithImageStackNames = "true",'\

@@ -123,6 +123,7 @@
 import ij.IJ;
 import ij.io.FileSaver;
 import ij.ImagePlus;
+import ij.ImageStack;
 import ij.plugin.Duplicator;
 import ij.measure.ResultsTable;
 import trainableSegmentation.ImageScience
@@ -205,9 +206,19 @@ if (cropBox!=null && cropBox.split(",").size()==6){
 IJ.run("Conversions...", " ");
 IJ.run(image, "32-bit", "");
 IJ.run("Conversions...", "scale");
-IJ.run(image,"Multiply...", "value="+ intensityScalingFactor +" stack");
 
-println("Image scaled")
+// IJ.run(image,"Multiply...", "value="+ intensityScalingFactor +" stack"); // stopped working in headless mode :)
+
+ImageStack imSt = image.getStack();
+	int width=imSt.getWidth();int height=imSt.getHeight();int slices=imSt.getSize();
+		for (int x=0;x<width;x++) {for (int y=0;y<height;y++) {for (int z=0;z<slices;z++) {
+			double v = imSt.getVoxel(x,y,z);
+			imSt.setVoxel(x,y,z,v*intensityScalingFactor);
+		}}}
+	image.setStack(imSt);
+	
+
+println("Image intensity scaled by factor "+intensityScalingFactor)
 
 // set up calibration based on voxel dimensions
 // these factors will be modified by currentDownsampling 
@@ -342,5 +353,5 @@ float durationMinutes = TimeCategory.minus( endTime, startTime ).toMilliseconds(
 
 println("ImageJ_filters_total" + "\t\t\t\t\t\t\t" + elapsedMinutesImageJfilters)
 println("ImageScience_total" + "\t\t\t\t\t\t\t" + (durationMinutes-elapsedMinutesImageJfilters))
-println("Total" + "\t\t\t\t\t" + sdf.format(startTime) + "\t" + sdf.format(endTime) + "\t" + durationMinutes)
-println()
+println("Total" + "\t\t\t\t\t" + sdf.format(startTime) + "\t" + sdf.format(endTime) + "\t" + durationMinutes);
+System.exit(0);

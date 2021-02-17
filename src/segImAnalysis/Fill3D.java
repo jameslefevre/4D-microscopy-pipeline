@@ -1,8 +1,8 @@
 package segImAnalysis;
 import ij.IJ;
 import ij.ImagePlus;
+import ij.ImageStack;
 import ij.measure.Calibration;
-import ij.plugin.ImageCalculator;
 import mcib3d.image3d.ImageByte;
 import mcib3d.image3d.processing.FillHoles3D;
 
@@ -27,15 +27,17 @@ public class Fill3D {
 			SegmentedImageOperations.selectChannel(classBinary,classNum);
 			//System.out.println("b");
 			classBinary = fill3D(classBinary);
-			// now to adjust classMap to remove any additional voxels in this class from any other classes
-			// first zero out these voxels in classMap
-			IJ.run(classBinary,"Macro...", "code=v=1*(v==0) stack");
-			ImageCalculator ic = new ImageCalculator();
-			ic.run("Multiply stack", classMap,classBinary);
-			// now add the class values back
-			IJ.run(classBinary,"Macro...", "code=v="+ classNum + "*(v==0) stack");
-			ic.run("Add stack", classMap,classBinary);
+			
+			// now adjust classMap
+			ImageStack classSt = classMap.getStack();
+			ImageStack maskSt = classBinary.getStack();
+			int width=classSt.getWidth();int height=classSt.getHeight();int slices=classSt.getSize();
+			for (int x=0;x<width;x++) {for (int y=0;y<height;y++) {for (int z=0;z<slices;z++) {
+				if (maskSt.getVoxel(x,y,z) > 0) {
+					classSt.setVoxel(x,y,z,classNum);
+				}
+			}}}
+			classMap.setStack(classSt);
 		}
 	}
-
 }

@@ -287,7 +287,20 @@ for (int st=firstStackNumber;st<=lastStackNumber;st++){
 		rawStack = rawStack.crop(cropBox[0][0], cropBox[1][0], cropBox[2][0], cropBox[0][1]-cropBox[0][0]+1 , cropBox[1][1]-cropBox[1][0]+1, cropBox[2][1]-cropBox[2][0]+1)    	
 		rawImage.setStack(rawStack)
 	}
-	IJ.run(rawImage,"Multiply...", "value="+ intensityScalingFactor +" stack");
+	//IJ.run(rawImage,"Multiply...", "value="+ intensityScalingFactor +" stack");// stopped working in headless mode :)
+	dims = rawImage.getDimensions()
+	// println(dims)
+	ImageStack imSt = rawImage.getStack()
+	for (x in 0..(dims[0]-1)){
+		println(x)
+		for (y in 0..(dims[1]-1)){
+			for (z in 0..(dims[3]-1)){
+				double v = imSt.getVoxel(x,y,z) 
+				imSt.setVoxel(x,y,z,v* intensityScalingFactor)
+			}
+		}
+	}
+	rawImage.setStack(imSt)
 	}
 
 
@@ -309,7 +322,7 @@ for (int st=firstStackNumber;st<=lastStackNumber;st++){
 println("Completed analysis for following segmented images:");
 println(nameSet);
 println("done")
-
+System.exit(0);
 
 String[] getNameArray(String path, int firstStackNumber, int lastStackNumber, String stackNumberPrefix, String stackNumberSuffix){
 	String[] nameArray = new String[lastStackNumber-firstStackNumber+1]

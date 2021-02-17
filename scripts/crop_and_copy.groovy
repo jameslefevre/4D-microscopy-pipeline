@@ -15,8 +15,9 @@ import ij.ImagePlus
 import ij.ImageStack
 
 int[][] cropBox = Eval.me(cropBox);
-
+println("opening " + imageLoadPath);
 ImagePlus im  = IJ.openImage(imageLoadPath);
+println("get stack");
 st = im.getImageStack()
 st = st.crop(cropBox[0][0], cropBox[1][0], cropBox[2][0], cropBox[0][1]-cropBox[0][0]+1 , cropBox[1][1]-cropBox[1][0]+1, cropBox[2][1]-cropBox[2][0]+1)    	
 im.setStack(st)

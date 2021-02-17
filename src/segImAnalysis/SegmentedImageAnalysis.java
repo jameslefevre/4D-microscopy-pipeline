@@ -9,6 +9,7 @@ import java.text.SimpleDateFormat;
 
 import ij.IJ;
 import ij.ImagePlus;
+import ij.ImageStack;
 import ij.io.FileSaver;
 import ij.measure.ResultsTable;
 import ij.plugin.Duplicator;
@@ -221,7 +222,13 @@ public class SegmentedImageAnalysis {
 		for (int layer=1;layer<=num_layers;layer++) {
 			unifiedObjectMap[layer-1] = segmentedImage.duplicate();
 			IJ.run(unifiedObjectMap[layer-1], "16-bit", "");
-			IJ.run(unifiedObjectMap[layer-1],"Multiply...", "value=0 stack");
+			//IJ.run(unifiedObjectMap[layer-1],"Multiply...", "value=0 stack");
+			ImageStack imSt = unifiedObjectMap[layer-1].getStack();
+			int width=imSt.getWidth();int height=imSt.getHeight();int slices=imSt.getSize();
+			for (int x=0;x<width;x++) {for (int y=0;y<height;y++) {for (int z=0;z<slices;z++) {
+				imSt.setVoxel(x,y,z,0);
+			}}}
+			unifiedObjectMap[layer-1].setStack(imSt);
 		}
 		
 		ImagePlus[] classDistanceMaps = new ImagePlus[channelsForDistanceMap==null ? 0 : channelsForDistanceMap.length];
@@ -275,7 +282,16 @@ public class SegmentedImageAnalysis {
 				for (int ii=0;ii<channelsForDistanceMap.length;ii++) {
 					if (channelsForDistanceMap[ii]!=classNum) {continue;}
 					ImagePlus biSmoothed = SplitObjects.smoothedDistanceMap(bi, false);
-					IJ.run(biSmoothed, "Macro...", "code=v=100*(v>"+smoothingErosionForDistanceMap[ii]+") stack");
+					
+					//IJ.run(biSmoothed, "Macro...", "code=v=100*(v>"+smoothingErosionForDistanceMap[ii]+") stack");
+					ImageStack imSt = biSmoothed.getStack();
+					int width=imSt.getWidth();int height=imSt.getHeight();int slices=imSt.getSize();
+					for (int x=0;x<width;x++) {for (int y=0;y<height;y++) {for (int z=0;z<slices;z++) {
+						double v = imSt.getVoxel(x,y,z);
+						imSt.setVoxel(x,y,z,v>smoothingErosionForDistanceMap[ii] ? 100.0 : 0 );
+					}}}
+					biSmoothed.setStack(imSt);
+					
 					classDistanceMaps[ii] = SplitObjects.smoothedDistanceMap(biSmoothed, true);
 				}
 			}
@@ -346,7 +362,16 @@ public class SegmentedImageAnalysis {
 
 		ImagePlus objectMapShifted = objectMap.duplicate();
 		ImageTypeConversion.imageTypeChangeTrueValue(objectMapShifted,bitDepth);
-		IJ.run(objectMapShifted,"Macro...", "code=v=(v+" + classOffSet + ")*(v>0) stack");
+		
+		//IJ.run(objectMapShifted,"Macro...", "code=v=(v+" + classOffSet + ")*(v>0) stack");
+		ImageStack imSt = objectMapShifted.getStack();
+		int width=imSt.getWidth();int height=imSt.getHeight();int slices=imSt.getSize();
+		for (int x=0;x<width;x++) {for (int y=0;y<height;y++) {for (int z=0;z<slices;z++) {
+			double v = imSt.getVoxel(x,y,z);
+			imSt.setVoxel(x,y,z,v>0 ? v+classOffSet : 0 );
+		}}}
+		objectMapShifted.setStack(imSt);
+		
 		ImageCalculator ic = new ImageCalculator();
 		ic.run("Add stack", unifiedObjectMap, objectMapShifted);  
 		return(nextClassOffset);
