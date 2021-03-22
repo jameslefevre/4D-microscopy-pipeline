@@ -91,7 +91,15 @@ public class GetSkeletons {
 		}
 		
 		// finish preparing msk
-		IJ.run(msk, "Macro...", "code=v=255*(v>0) stack"); 
+		// IJ.run(msk, "Macro...", "code=v=255*(v>0) stack"); 
+		ImageStack imSt = msk.getStack();
+		int width=imSt.getWidth();int height=imSt.getHeight();int slices=imSt.getSize();
+		for (int x=0;x<width;x++) {for (int y=0;y<height;y++) {for (int z=0;z<slices;z++) {
+			double v = imSt.getVoxel(x,y,z);
+			imSt.setVoxel(x,y,z,v>0 ? 255 : 0 );
+		}}}
+		msk.setStack(imSt);
+		
 	  	ImageTypeConversion.imageTypeChangeTrueValue(msk, "8-bit");
 	  	ImageTypeConversion.imageTypeChangeTrueValue(msk, "8-bit");
 	  	if (optionalWorkingSaveFolder!=null) {new FileSaver( msk).saveAsTiff( optionalWorkingSaveFolder + "separatedObjects.tif");}

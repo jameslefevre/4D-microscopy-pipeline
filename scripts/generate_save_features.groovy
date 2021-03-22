@@ -304,7 +304,9 @@ for (int r=0; r<model_features.size(); r++){
 		}
 		int index = Math.round(parameter)
 		newImage = hess[index]
-	}
+	} else {
+		hess = null;
+		}
 	if (operation=="Derivatives"){
 		int ii = Math.round(parameter)
 		newImage = ImageScience.computeDifferentialImage(s, ii, ii, ii, currentImage)
@@ -322,7 +324,9 @@ for (int r=0; r<model_features.size(); r++){
 		}
 		int index = Math.round(parameter)
 		newImage = struct_1[index]
-	}
+	} else {
+		struct_1 = null;
+		}
 	if (operation=="Structure_3"){
 		if ( (struct_3 == null) || (struct_3_sigma != s) || changedDownSampleFactor){
 			struct_3 = ImageScience.computeEigenimages(s,3.0,currentImage)
@@ -330,7 +334,9 @@ for (int r=0; r<model_features.size(); r++){
 		}
 		int index = Math.round(parameter)
 		newImage = struct_3[index]
-	}
+	} else {
+		struct_3 = null;
+		}
 
 	if (newImage != null){
 		if (currentDownsampling != [1,1,1]){
@@ -346,6 +352,9 @@ for (int r=0; r<model_features.size(); r++){
 	if (group=="IJ_filter"){elapsedMinutesImageJfilters+=fDurationMinutes}
 	print(fname + "\t" + operation + "\t" + parameter + "\t" + s + "\t" + group + "\t")
 	println(sdf.format(fStartTime) + "\t" + sdf.format(fEndTime) + "\t" + fDurationMinutes)
+
+	newImage = null;
+	Thread.sleep(500);
 }
 
 endTime = new Date();
