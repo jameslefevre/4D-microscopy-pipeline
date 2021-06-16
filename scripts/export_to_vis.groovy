@@ -30,11 +30,19 @@
  * The time steps / stack numbers to convert, specified as a list of numbers, e.g. [1,101,201,301], or a range, e.g. 1..10
  * Specifying an excessive range will not cause an error; time steps where no tiff stack exists will simply be skipped.
  * @param stackNumberPrefix
- * A string identifying the start of the stack number in the filename (stack number may be left-padded with zeroes).
+ * A string identifying the start of the stack number in the filename (original image; stack number may be left-padded with zeroes).
  * @param stackNumberSuffix
- * A string identifying the end of the stack number in the filename. The script will extract the text from the filename 
+ * A string identifying the end of the stack number in the filename (original image). The script will extract the text from the filename 
  * between stackNumberPrefix and stackNumberSuffix, and attempt to read it as an integer (leading zeros ignored), 
  * which identifies the stack.
+ * @param stackNumberPrefixSeg
+ * stackNumberPrefix, but for segmented images
+ * @param stackNumberSuffixSeg
+ * stackNumberSuffix, but for segmented images
+ * @param stackNumberPrefixProb
+ * stackNumberPrefix, but for probability map images
+ * @param stackNumberSuffixProb
+ * stackNumberSuffix, but for probability map images
  * @param convertRawSegProb
  * Array of 3 flags (true/false), e.g. [true,true,false], indicating which of the 3 image types 
  * (raw (deconvolved) image, segmentation, probability maps) should be exported as png stacks.
@@ -48,8 +56,9 @@
  * 0 and max value respectively). The processed image will be 8-bit, generally much smaller than the original image 
  * (typically 32 bit), so truncation of the range is required due to the very high dynamic range often seen in microscopy data.
  * @param channelSelection
- * An array of 3 integers [red_channel,green_channel,blue_channel], each between zero and the number of segmentation classes minus 1; 
- * specifies which probability map channels to map to the RGB channels.
+ * An array of up to 3 integers [red_channel,green_channel,blue_channel], each between 1 and the number of segmentation classes; 
+ * specifies which probability map channels to map to the RGB channels. Values out of this range will cause a run-time error. Channels 
+ * which are not included in this array will not be represented in the visualiser probability map.
  * Using RGB colouring, we can represent a probability map across at most 3 classes (technically 4, where the 4th is background/other,
  * represented by black or transparent). Note that this limitation does not apply to the actual segmentation, where the only limit to
  * the classes that can be represented is the number of colours that can be distinguished.
@@ -66,6 +75,11 @@
 #@ String stackNums
 #@ String stackNumberPrefix
 #@ String stackNumberSuffix
+#@ String stackNumberPrefix
+#@ String stackNumberPrefixSeg
+#@ String stackNumberSuffixSeg
+#@ String stackNumberPrefixProb
+#@ String stackNumberSuffixProb
 #@ String convertRawSegProb
 #@ String cropRawSegProb
 #@ String cropBox
@@ -81,6 +95,8 @@ import ij.ImageStack
 import ij.plugin.ChannelArranger
 import ij.process.LUT
 
+
+println("\n*** Starting export_to_vis.groovy ***\n");
 // conversion of structured parameters
 int[] stackNums  = Eval.me(stackNums)
 boolean[] convertRawSegProb = Eval.me(convertRawSegProb);
@@ -109,9 +125,12 @@ if (probMapSaveFolder[-1]!="/"){probMapSaveFolder=probMapSaveFolder+"/";}
 
 nameSetImage = getFileNames(imageFolder, stackNumberPrefix, stackNumberSuffix, stackNums)
 
+println("\nFound following file names to process: ");
+println(nameSetImage);
 // now cycle through the 3 image types
 
 if (convertRawSegProb[0]){	
+	println("convert original images");
 	for (String nm : nameSetImage.values()){
 		sourceFile = imageFolder + nm + ".tif"
 		println("Opening " + sourceFile)
@@ -132,7 +151,10 @@ if (convertRawSegProb[0]){
 
 // segmented images
 if (convertRawSegProb[1]){
-	nameSet = getFileNames(segFolder, stackNumberPrefix, stackNumberSuffix, stackNums)
+	println("Doing seg images:");
+	nameSet = getFileNames(segFolder, stackNumberPrefixSeg, stackNumberSuffixSeg, stackNums)
+	println("\nSegmented image file names to process: ");
+	println(nameSet);
 	for (stackNum in nameSet.keySet()){
 		nm = nameSet[stackNum]
 		sourceFile = segFolder + nm + ".tif"
@@ -151,13 +173,16 @@ if (convertRawSegProb[1]){
 
 // prob maps starting as 8 or 32 bit 4 channel composite (still have background)
 if (convertRawSegProb[2]){	
+	println("Doing prob images:");
 	ChannelArranger channelArranger = new ChannelArranger()
 	byte[] crusc = new byte[256]
 	byte[] zs = new byte[256]
 	for (int ii=0; ii<256; ii++){crusc[ii]=ii}
 	LUT[] rgbLUTs = [new LUT(crusc,zs,zs), new LUT(zs,crusc,zs), new LUT(zs,zs,crusc)]
 	
-	nameSet = getFileNames(probMapFolder, stackNumberPrefix, stackNumberSuffix, stackNums)
+	nameSet = getFileNames(probMapFolder, stackNumberPrefixProb, stackNumberSuffixProb, stackNums)
+	println("\nProb image file names to process: ");
+	println(nameSet);
     for (stackNum in nameSet.keySet()){
     	nm = nameSet[stackNum]
     	sourceFile = probMapFolder + nm + ".tif"
@@ -208,22 +233,28 @@ Map getFileNames(String folderPath, String stackNumberPrefix, String stackNumber
 		if (x[1] != "tif" && x[1] != "tiff"){continue}
 		fn = x[0]
 		println(fn)
+		fn_complete=fn
 	
 		// extract stack number
+		if (stackNumberPrefix!=""){
 		splt_fn = fn.split(stackNumberPrefix)
 		//println(splt_fn.size())
 		if (splt_fn.size()<2){continue}
-		part_fn = splt_fn[1]
-		splt_fn = part_fn.split(stackNumberSuffix)
+		fn = splt_fn[1]
+		} 
+		if (stackNumberSuffix!=""){
+		splt_fn = fn.split(stackNumberSuffix)
 		//println(splt_fn.size())
 		if (splt_fn.size()<2){continue}
 		//println(splt_fn[0])
-		int stNum = splt_fn[0].toInteger();
+		fn=splt_fn[0]
+		}
+		int stNum = fn.toInteger();
 		//println(stNum)
 	
 		if (stackNums.contains(stNum)){
 			//nameSet.add(fn);
-			nameSet[stNum]=fn
+			nameSet[stNum]=fn_complete
 		}
 	}
 	println(nameSet);
@@ -256,8 +287,10 @@ void saveStackToPngImageArray(ImagePlus im, String saveFolder, Integer minIntens
     	IJ.setMinAndMax(im, minIntensity, maxIntensity);
     	IJ.run(im, "8-bit", ""); 	
     }
-    
+    // IJ.run(im, "8-bit", "");
     println("saving to: " + saveFolder);
+    // println("Check that im is not null: " + (im!=null));
+    // new FileSaver( im ).saveAsTiff(saveFolder+".tif");
 	IJ.run(im, "Image Sequence... ", "format=PNG name=slice save='" + saveFolder + "slice0000.png'");
 }
 

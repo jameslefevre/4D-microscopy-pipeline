@@ -109,8 +109,13 @@ for (String fn : files){
 	if (splt_fn.size()<2){continue}
 	part_fn = splt_fn[1]
 	splt_fn = part_fn.split(stackNumberSuffix)
-	if (splt_fn.size()<2){continue}
-	int stNum = splt_fn[0].toInteger();
+	
+	// if (splt_fn.size()<2){continue} // if suffix is at end of filename, size will be 1 and that is fine; no match will also give size 1
+	int stNum;
+	try{
+		stNum = splt_fn[0].toInteger();
+	} catch(Exception e) {continue;}
+	//int stNum = splt_fn[0].toInteger();
 	// println(stNum)
 	
 	if (firstStackNumber <= stNum && lastStackNumber >= stNum ){
@@ -128,37 +133,46 @@ for (imageStackName in nameSet){
 	
   String imagePath = imageStackLocation + imageStackName + "/object_map.tif";
   print("opening " + imagePath + ":   ");
-  // ImagePlus classMapImage  = IJ.openImage( imagePath ); 
-  ImagePlus classMapImage=null;
+  // ImagePlus objectMapImage  = IJ.openImage( imagePath ); 
+  ImagePlus objectMapImage=null;
   for (int _try=0;_try<3;_try++){
 	try{
-		classMapImage  = IJ.openImage( imagePath ); 
+		objectMapImage  = IJ.openImage( imagePath ); 
 	} catch(Exception e) {
     	println("Exception: ${e}")
-    	classMapImage=null;
+    	objectMapImage=null;
 	}
-	if (classMapImage!=null){break;}
+	if (objectMapImage!=null){break;}
 	sleep(30000)
   }
-  println(classMapImage==null ? "Failed" : "Succeeded");
+  println(objectMapImage==null ? "Failed" : "Succeeded");
+  if (objectMapImage==null) continue;
 
-  imagePath = imageStackLocation + imageStackName + "/object_map2.tif";
-  print("opening " + imagePath + ":   ");
-  //ImagePlus classMapImage2  = IJ.openImage( imagePath ); 
-  ImagePlus classMapImage2=null;
-  for (int _try=0;_try<3;_try++){
-	try{
-		classMapImage2  = IJ.openImage( imagePath ); 
-	} catch(Exception e) {
-    	println("Exception: ${e}")
-    	classMapImage2=null;
-	}
-	if (classMapImage2!=null){break;}
-	sleep(30000)
+  ArrayList<ImagePlus> objectMapImageList = new ArrayList<ImagePlus>();
+  objectMapImageList.add(objectMapImage);
+
+  int omNum=1
+  while(true){
+  	objectMapImage=null;
+  	omNum+=1;
+  	imagePath = imageStackLocation + imageStackName + "/object_map"+omNum+".tif";
+  	print("opening " + imagePath + ":   ");
+  	for (int _try=0;_try<3;_try++){
+	  try{
+	  	objectMapImage  = IJ.openImage( imagePath ); 
+  	  } catch(Exception e) {
+      	 println("Exception: ${e}")
+    	 objectMapImage=null;
+	  }
+	  if (objectMapImage!=null){break;}
+	  sleep(30000)
+    }
+    println(objectMapImage==null ? "Failed" : "Succeeded");
+    if (objectMapImage==null) break;
+    objectMapImageList.add(objectMapImage);
   }
-  println(classMapImage2==null ? "Failed" : "Succeeded");
-  
- ImagePlus[] classMapImages = [classMapImage,classMapImage2]
+
+ ImagePlus[] objectMapImages = objectMapImageList.toArray(); // [objectMapImage,objectMapImage2]
 
   String objectStatsPath = imageStackLocation + imageStackName + "/objectStats.txt";
   print("opening " + objectStatsPath + ":   ");
@@ -166,7 +180,7 @@ for (imageStackName in nameSet){
   println(objectStats==null ? "Failed" : "Succeeded");
   int maxId = (int) Math.round(objectStats.getValue("id",objectStats.size()-1))
   println("Max object id " + maxId)
-  Object3DVoxels[] obsVox = getVoxelObjects(classMapImages, 1, maxId) // indexed from 1, the first object id
+  Object3DVoxels[] obsVox = getVoxelObjects(objectMapImages, 1, maxId) // indexed from 1, the first object id
   List[] obMeshes_array = new List[obsVox.size()]; // also indexed from 1, the first object id
   for (int ii=0; ii<objectStats.size(); ii++){
     int id = (int) Math.round(objectStats.getValue("id",ii));

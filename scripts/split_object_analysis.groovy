@@ -196,18 +196,36 @@ if (cropBox!=""){
 int[][] cropBox = cb 
 
 sdf = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss")
+println("\nLooking in segmented image folder imageStackLocation = "+ imageStackLocation);
 String[] nameSet = getNameArray(imageStackLocation, firstStackNumber, lastStackNumber, stackNumberPrefix, stackNumberSuffix);
+println("List of files matching template and specified stack numbers:");
 println(nameSet);
+
+println("\nLooking in original image folder originalStackLocation = "+ originalStackLocation);
 String[] nameSetRaw = (originalStackLocation != null && originalStackLocation != "") ? getNameArray(originalStackLocation, firstStackNumber, lastStackNumber, stackNumberPrefix, stackNumberSuffix) : null;
+println("List of files matching template and specified stack numbers:");
 println(nameSetRaw);
+
+println("\nLooking in segmentation probability map folder probStackLocation = "+ probStackLocation);
 String[] nameSetProb = (probStackLocation != null && probStackLocation != "") ? getNameArray(probStackLocation, firstStackNumber, lastStackNumber, stackNumberPrefix, stackNumberSuffix) : null;
+println("List of files matching template and specified stack numbers:");
 println(nameSetProb);
 
+println("\nStart loop through stack numbers:");
 for (int st=firstStackNumber;st<=lastStackNumber;st++){
 	int ind=st-firstStackNumber
-	if (nameSet[ind]==null){continue;}
-	if (nameSetRaw!=null && nameSetRaw[ind]==null){continue;}
-	if (nameSetProb!=null && nameSetProb[ind]==null){continue;}
+	println();
+	print("Stack number "+st+": ");
+	if (nameSet[ind]==null){
+		println("Segmentation file not found");
+		continue;}
+	if (nameSetRaw!=null && nameSetRaw[ind]==null){
+		println("Original file not found");
+		continue;}
+	if (nameSetProb!=null && nameSetProb[ind]==null){
+		println("Segmentation probability file not found");
+		continue;}
+	println("Required file(s) identified");
 	classMapPath = imageStackLocation + nameSet[ind] + ".tif"
 	rawImagePath = nameSetRaw==null ? null : originalStackLocation + nameSetRaw[ind] + ".tif"
 	probImagePath = nameSetProb==null ? null : probStackLocation + nameSetProb[ind] + ".tif"
@@ -282,12 +300,13 @@ for (int st=firstStackNumber;st<=lastStackNumber;st++){
 	if (rawImage != null){
 
 	if (cropBox!=null){
-		println(cropBox)
+		println("Applying crop box to original image: " + cropBox);
 		ImageStack rawStack = rawImage.getImageStack()
 		rawStack = rawStack.crop(cropBox[0][0], cropBox[1][0], cropBox[2][0], cropBox[0][1]-cropBox[0][0]+1 , cropBox[1][1]-cropBox[1][0]+1, cropBox[2][1]-cropBox[2][0]+1)    	
 		rawImage.setStack(rawStack)
 	}
 	//IJ.run(rawImage,"Multiply...", "value="+ intensityScalingFactor +" stack");// stopped working in headless mode :)
+	println("Applying intensityScalingFactor to original image: " + cropBox);
 	dims = rawImage.getDimensions()
 	// println(dims)
 	ImageStack imSt = rawImage.getStack()
@@ -302,6 +321,9 @@ for (int st=firstStackNumber;st<=lastStackNumber;st++){
 	}
 	rawImage.setStack(imSt)
 	}
+
+
+	println("Calling primary method  SegmentedImageAnalysis.splitObjectAnalysis");
 
 
 	SegmentedImageAnalysis.splitObjectAnalysis(
@@ -319,7 +341,7 @@ for (int st=firstStackNumber;st<=lastStackNumber;st++){
 	smoothingErosionForDistanceMap,
         false)
 }
-println("Completed analysis for following segmented images:");
+println("\nCompleted analysis for following segmented images:");
 println(nameSet);
 println("done")
 System.exit(0);
@@ -337,7 +359,7 @@ String[] getNameArray(String path, int firstStackNumber, int lastStackNumber, St
 			sleep(30000)
 	}
 	if (files==null){
-		date = new Date(); println("Failed to load file names in " + imageStackLocation + " ; terminating   " + sdf.format(date));
+		date = new Date(); println("Failed to load file names in " + path + " ; terminating   " + sdf.format(date));
 		System.exit(0)
 	}
 	Arrays.sort(files);
@@ -349,8 +371,12 @@ String[] getNameArray(String path, int firstStackNumber, int lastStackNumber, St
 		if (splt_fn.size()<2){continue}
 		part_fn = splt_fn[1]
 		splt_fn = part_fn.split(stackNumberSuffix)
-		if (splt_fn.size()<2){continue}
-		int stNum = splt_fn[0].toInteger();
+		// if (splt_fn.size()<2){continue} // if suffix is at end of filename, size will be 1 and that is fine; no match will also give size 1
+		int stNum;
+		try{
+			stNum = splt_fn[0].toInteger();
+		} catch(Exception e) {continue;} //stNum = null;
+
 		// println(stNum)
 
 		if (firstStackNumber <= stNum && lastStackNumber >= stNum ){

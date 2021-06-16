@@ -1,34 +1,17 @@
 
 /**
- * Processes a folder containing tiff files, to produce maximum intensity projections (MIPs) and other summary information.
- * Expects input files to be single channel image stacks (3D), with file names that can be parsed to get a stack number.
- * The intended purpose is preliminary analysis of pre-processed image data.
- * Each stack is opened sequentially in alphanumerical order, a stack number is parsed from the filename, then several outputs 
- * are produced:
- * 
- * MIP: each stack is reduced to a single slice using a maximum intensity projection along the z-axis (so pixel (x,y) is assigned 
- * the maximum value over the voxels (x,y,1) ... (x,y,z_max), where 1 ... z_max are the slice numbers) 
- * MIP_y: same except projected along the y-axis
- * StackSummary: the mean, median, min, max, standard deviation and total voxel count for each stack
- * SliceSummary: the mean, median, min, max, and standard deviation for each z slice within each stack
- * StackHistsSqrt: A 1000-bin histogram of the square roots of the intensity values within each stack 
- * 
- * The MIP and MIP_y outputs are compiled into image stacks after primary processing (with dimensions x,y,time and x,z,time).
- * The folders of individual MIP slices should be deleted once the compiled stacks are verified.
- * Other data is aggregated across stacks into a single table for each of the 3 putput types, and saved as csv files. 
- * StackSummary and SliceSummary have column/field labels, and stack numbers are marked by the "time" field (SliceSummary also has a "slice" 
- * field.
- * StackHistsSqrt contains no header or any other explanatory information. Each row represents a stack, listed in the order processed.
- * The row contains 1000 values, representing voxel counts in 1000 bins, equally spaced from sqrt(min value) to sqrt(max value); the min 
- * and max for each stack must be obtained from StackSummary. The square root (equivalently, gamma transform with gamma=0.5) is designed 
- * to compress the intensity range produced from the LLS microscope to give histograms where the distibution in the majority of voxels 
- * is not obscured by a small number of very high intensity voxels.
- * 
+ * This is max_proj_and_summary with an additional step:
+ *   - Each source image stack is adjusted by a given constant (this constant is added to voxel)
+ *   - Negative voxel values are then changed to zero.
+ *   - Stack is saved over original
+ *   - max_proj_and_summary then proceeds as normal
+ *   - designed to standardise background level
+ *   - One extra parameter, intensityAdjustment
  * 
  * @param inputPath
- * Absolute path to folder containing tif files (expects trailing "/")
+ * Absolute path to folder containing tif files (expects training "/")
  * @param outputPath
- * Absolute path of folder to save output files (expects trailing "/")
+ * Absolute path of folder to save output files (expects training "/")
  * @param cacheFolder
  * Path to a temporary folder where the input tiff stack can be copied before opening, and the output
  * files can be kept until complete. This can be useful when the source data
@@ -40,6 +23,8 @@
  * A string identifying the end of the stack number in the filename. The script will extract the text from the filename 
  * between stackNumberPrefix and stackNumberSuffix, and attempt to read it as an integer (leading zeros ignored), 
  * which identifies the stack.
+ * @param intensityAdjustment 
+ * This value is added to each voxel before negative values are rectified to 0
  */
 
 #@ String inputPath
@@ -47,6 +32,7 @@
 #@ String cacheFolder
 #@ String stackNumberPrefix
 #@ String stackNumberSuffix
+#@ Float intensityAdjustment
 
 import ij.IJ
 import ij.io.FileSaver
@@ -141,6 +127,30 @@ for (fnum=0;fnum<files.size();fnum++){ // files.size()
 	} else {
 		im = IJ.openImage((String) files[fnum]);
 	} 
+
+
+	// added code
+
+    dims = im.getDimensions()
+	ImageStack imSt = im.getStack()
+	for (x in 0..(dims[0]-1)){
+		println(x)
+		for (y in 0..(dims[1]-1)){
+			for (z in 0..(dims[3]-1)){
+				double v = imSt.getVoxel(x,y,z) + intensityAdjustment;
+				if (v<0) {
+					v=0;
+				}
+				imSt.setVoxel(x,y,z,v)
+			}
+		}
+	}
+	im.setStack(imSt)
+	new FileSaver( im ).saveAsTiff( (String) files[fnum]);
+
+	// end added code
+
+	
 	
 	maxProj = ZProjector.run(im,"max")
 	new FileSaver( maxProj ).saveAsTiff( MIPSfolder + "MAX_"+fn + ".tif");

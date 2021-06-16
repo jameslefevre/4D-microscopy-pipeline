@@ -13,7 +13,8 @@ saveProbabilityMaps='true'
 pixelSize_unit='nm'
 pixelSize_xy='104'
 pixelSize_z='268.146'
-
+channel_grouping='[[0],[1],[2,3]]'
+channels='4'
 
 /home/james/software/Fiji.app/ImageJ-linux64 --ij2 --headless --run /home/james/work/eclipse-workspace/Segmented_Image_Analysis/src/scripts/apply_classifiers.groovy \
 "feature_model_table='$feature_model_table',"\

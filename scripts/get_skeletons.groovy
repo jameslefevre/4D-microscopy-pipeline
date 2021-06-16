@@ -88,8 +88,13 @@ for (String fn : files){
 	if (splt_fn.size()<2){continue}
 	part_fn = splt_fn[1]
 	splt_fn = part_fn.split(stackNumberSuffix)
-	if (splt_fn.size()<2){continue}
-	int stNum = splt_fn[0].toInteger();
+	// if (splt_fn.size()<2){continue} // if suffix is at end of filename, size will be 1 and that is fine; no match will also give size 1
+	int stNum;
+	try{
+		stNum = splt_fn[0].toInteger();
+	} catch(Exception e) {continue;}
+		
+	//int stNum = splt_fn[0].toInteger();
 	// println(stNum)
 	
 	if (firstStackNumber <= stNum && lastStackNumber >= stNum ){
@@ -103,6 +108,7 @@ for (imageStackName in nameSet){
 	println(saveName + " already exists : skipping ")
 	continue;
   }
+  
   String imagePath = imageStackLocation + imageStackName + "/object_map.tif";
   print("opening " + imagePath + ":   ");
   // ImagePlus objectMapImage  = IJ.openImage( imagePath ); 
@@ -118,24 +124,33 @@ for (imageStackName in nameSet){
 	sleep(30000)
   }
   println(objectMapImage==null ? "Failed" : "Succeeded");
+  if (objectMapImage==null) continue;
 
-  imagePath = imageStackLocation + imageStackName + "/object_map2.tif";
-  print("opening " + imagePath + ":   ");
-  //ImagePlus objectMapImage2  = IJ.openImage( imagePath ); 
-  ImagePlus objectMapImage2=null;
-  for (int _try=0;_try<3;_try++){
-	try{
-		objectMapImage2  = IJ.openImage( imagePath ); 
-	} catch(Exception e) {
-    	println("Exception: ${e}")
-    	objectMapImage2=null;
-	}
-	if (objectMapImage2!=null){break;}
-	sleep(30000)
+  ArrayList<ImagePlus> objectMapImageList = new ArrayList<ImagePlus>();
+  objectMapImageList.add(objectMapImage);
+
+  int omNum=1
+  while(true){
+  	objectMapImage=null;
+  	omNum+=1;
+  	imagePath = imageStackLocation + imageStackName + "/object_map"+omNum+".tif";
+  	print("opening " + imagePath + ":   ");
+  	for (int _try=0;_try<3;_try++){
+	  try{
+	  	objectMapImage  = IJ.openImage( imagePath ); 
+  	  } catch(Exception e) {
+      	 println("Exception: ${e}")
+    	 objectMapImage=null;
+	  }
+	  if (objectMapImage!=null){break;}
+	  sleep(30000)
+    }
+    println(objectMapImage==null ? "Failed" : "Succeeded");
+    if (objectMapImage==null) break;
+    objectMapImageList.add(objectMapImage);
   }
-  println(objectMapImage2==null ? "Failed" : "Succeeded");
-  
- ImagePlus[] objectMapImages = [objectMapImage,objectMapImage2]
+
+ ImagePlus[] objectMapImages = objectMapImageList.toArray(); 
 
   String objectStatsPath = imageStackLocation + imageStackName + "/objectStats.txt";
   print("opening " + objectStatsPath + ":   ");
