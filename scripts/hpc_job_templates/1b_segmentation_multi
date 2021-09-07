@@ -78,7 +78,7 @@ rm -r $featurePath
 "pixelSize_unit='$pixelSize_unit',"\
 "pixelSize_xy='$pixelSize_xy',"\
 "pixelSize_z='$pixelSize_z',"\
-"channel_grouping='$channel_grouping',"\
+"channel_grouping=$channel_grouping,"\
 "channels='$channels'"
 
 done

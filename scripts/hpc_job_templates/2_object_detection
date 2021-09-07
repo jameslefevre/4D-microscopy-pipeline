@@ -1,38 +1,38 @@
 #!/bin/bash
 #
-#PBS -N object_detection
-#PBS -A Your_Account_String
-#PBS -l select=1:ncpus=3:mpiprocs=3:mem=80GB,walltime=3:00:00
+#PBS -N object_detection_Caroline
+#PBS -A UQ-IMB
+#PBS -l select=1:ncpus=6:mpiprocs=6:mem=120GB,walltime=3:00:00
 
 (sleep $(( ($PBS_ARRAY_INDEX % 10) * 15 )))
 
-numberStacksPerJob=10
+numberStacksPerJob=1
 lastStack=$(( ($numberStacksPerJob)*($PBS_ARRAY_INDEX) ))
 firstStack=$(( ($lastStack)-($numberStacksPerJob)+1 ))
 
 echo "job "$PBS_ARRAY_INDEX" stacks "$firstStack" - "$lastStack
 
-~/Fiji.app/ImageJ-linux64 --ij2 --headless --allow-multiple --run ~/code/split_object_analysis.groovy \
-"imageStackLocation='/segmented/',"\
-"originalStackLocation='/images/',"\
-"probStackLocation='/probability_maps/',"\
-"savePath='/outputs/objectAnalysis/',"\
+/scratch/user/uqrpien1/tmp/pipeline/Fiji.app/ImageJ-linux64 --ij2 --headless --allow-multiple --run /scratch/user/uqrpien1/tmp/pipeline/code/split_object_analysis.groovy \
+"imageStackLocation='/scratch/user/uqrpien1/tmp/pipeline/outputs/segmented/',"\
+"originalStackLocation='/QRISdata/Q2823/Data_for_Richard/Deskewed/June/BEST_20210617/',"\
+"probStackLocation='scratch/user/uqrpien1/tmp/pipeline/outputs/probability_maps/',"\
+"savePath='scratch/user/uqrpien1/tmp/pipeline/outputs/objects/',"\
 "firstStackNumber='$firstStack',"\
 "lastStackNumber='$lastStack',"\
-"numberThreadsToUse='2',"\
-"stackNumberPrefix='-t',"\
-"stackNumberSuffix='-e',"\
-"fileNamePrefix='c1-',"\
+"numberThreadsToUse='6',"\
+"stackNumberPrefix='e',"\
+"stackNumberSuffix='_c',"\
+"fileNamePrefix='',"\
 "overwriteExisting='false',"\
-"classNumsToFill='[1,2,3]',"\
-"classesToAnalyse='[1,2,3,4]',"\
-"classLayers='[1,2,2,1]',"\
-"incorporatedChannels='[[1],[2],[3],[2,3]]',"\
-"dynamic='[200,10,10,10]',"\
+"classNumsToFill='[2,3]',"\
+"classesToAnalyse='[1,2,3]',"\
+"classLayers='[1,2,2]',"\
+"incorporatedChannels='[[1],[2],[3]]',"\
+"dynamic='[200,10,10]',"\
 "minVoxExtraObjects='75',"\
-"channelsForDistanceMap='[1,3]',"\
-"smoothingErosionForDistanceMap='[300,20]',"\
-"intensityScalingFactor='4.09808073219042',"\
-"cropBox='[[393,758],[161,903],[13,141]]'"
+"channelsForDistanceMap='[2,3]',"\
+"smoothingErosionForDistanceMap='[20,20]',"\
+"intensityScalingFactor='1',"\
+"cropBox=''"
 
 exit 0
