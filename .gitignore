@@ -28,6 +28,9 @@ hs_err_pid*
 # folder for explicitly ignored files
 local*
 
+# r file in HPC templates
+.Rhistory
+
 /bin/
 
 !Segmented_Image_Analysis.jar
