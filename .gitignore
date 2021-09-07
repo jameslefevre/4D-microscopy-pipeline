@@ -29,7 +29,7 @@ hs_err_pid*
 local*
 
 # r file in HPC templates
-.Rhistory
+*.Rhistory
 
 /bin/
 
