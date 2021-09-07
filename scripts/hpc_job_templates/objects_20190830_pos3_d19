@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#PBS -N objects_20190830_pos3_distanceInfo
+#PBS -N object_detection
 #PBS -A UQ-IMB
 #PBS -l select=1:ncpus=3:mpiprocs=3:mem=80GB,walltime=3:00:00
 
@@ -13,10 +13,10 @@ firstStack=$(( ($lastStack)-($numberStacksPerJob)+1 ))
 echo "job "$PBS_ARRAY_INDEX" stacks "$firstStack" - "$lastStack
 
 ~/Fiji.app/ImageJ-linux64 --ij2 --headless --allow-multiple --run ~/code/split_object_analysis.groovy \
-"imageStackLocation='/RDS/Q0930/MachineLearning_ARC_Grant_work/20190830_LLSM_Yvette/Pos3/segmentation/d19_intAdj_rep1ds1gd_rf/segmented/',"\
-"originalStackLocation='/RDS/Q0930/MachineLearning_ARC_Grant_work/20190830_LLSM_Yvette/Pos3/Decon_output/',"\
-"probStackLocation='/RDS/Q0930/MachineLearning_ARC_Grant_work/20190830_LLSM_Yvette/Pos3/segmentation/d19_intAdj_rep1ds1gd_rf/probability_maps/',"\
-"savePath='/RDS/Q0930/MachineLearning_ARC_Grant_work/20190830_LLSM_Yvette/Pos3/segmentation/d19_intAdj_rep1ds1gd_rf/objectAnalysis2/',"\
+"imageStackLocation='/segmented/',"\
+"originalStackLocation='/images/',"\
+"probStackLocation='/probability_maps/',"\
+"savePath='/outputs/',"\
 "firstStackNumber='$firstStack',"\
 "lastStackNumber='$lastStack',"\
 "numberThreadsToUse='2',"\
