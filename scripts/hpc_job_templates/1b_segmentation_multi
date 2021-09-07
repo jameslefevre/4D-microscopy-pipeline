@@ -1,8 +1,8 @@
 #!/bin/bash
 #
-#PBS -N segment_20200728_MDA231control_2
-#PBS -A UQ-IMB
-#PBS -l select=1:ncpus=3:mpiprocs=3:mem=80GB,walltime=1:00:00
+#PBS -N segment_multi
+#PBS -A Your_Account_String
+#PBS -l select=1:ncpus=3:mpiprocs=3:mem=80GB,walltime=4:00:00
 
 
 feature_model_table='/code/feature_model_table.txt'
@@ -22,27 +22,37 @@ pixelSize_z='268.146'
 intensityScalingFactor='2.49739854318418'
 intensityScalingFactorTimeStep='1.00023326633857'
 cropBox='205,823,211,741,0,154'
+numberStacksPerJob=20
 channel_grouping='[[0],[1],[2,3]]'
 channels='4'
 
-intensityScalingFactor=$(echo "$intensityScalingFactor $intensityScalingFactorTimeStep $PBS_ARRAY_INDEX" | awk '{print $1*($2^($3-1));}')
 
-echo "PBS_ARRAY_INDEX (timestep) = "$PBS_ARRAY_INDEX
+
+(sleep $(( ($PBS_ARRAY_INDEX % 10) * 15 )))
+
+let firstStack=$numberStacksPerJob*$PBS_ARRAY_INDEX-$numberStacksPerJob+1
+let lastStack=$numberStacksPerJob*$PBS_ARRAY_INDEX
+
+echo "job "$PBS_ARRAY_INDEX" stacks "$firstStack" - "$lastStack
 echo "Apply cropping box: "$cropBox
 echo "Pixel dimensions: "$pixelSize_xy" (x,y); "$pixelSize_z" (z)"
-echo "Adjusted intensityScalingFactor: "$intensityScalingFactor
 
-imageStackName=$(ls $imageStackLocation | grep "$stackNumberPrefix"0*$PBS_ARRAY_INDEX"$stackNumberSuffix" | grep "^$prefix" | cut -d. -f1)
+for ((stackNum=$firstStack;stackNum<=$lastStack;stackNum++))
+do
+intensityScalingFactorAdjusted=$(echo "$intensityScalingFactor $intensityScalingFactorTimeStep $stackNum" | awk '{print $1*($2^($3-1));}')
+echo "stackNum = "$stackNum
+echo "Adjusted intensityScalingFactor: "$intensityScalingFactorAdjusted
+imageStackName=$(ls $imageStackLocation | grep "$stackNumberPrefix"0*$stackNum"$stackNumberSuffix" | grep "^$prefix" | cut -d. -f1)
 
 # CI_path_check=$savePath"Classified_Image_"$imageStackName"_"$modelName".tif"
 CI_path_check=$savePath"segmented/"$imageStackName"_seg_"$modelName".tif"
 if [ -f $CI_path_check ]; then
    echo "Segmented image already exists: exiting job"
-   exit 0
+   continue
 fi
 
-
-(sleep $(( ($PBS_ARRAY_INDEX % 10) * 15 )))
+echo "Clear feature stack:"
+rm -r $featurePath
 
 ~/Fiji.app/ImageJ-linux64 --ij2 --headless --run ~/code/generate_save_features.groovy \
 "feature_model_table='$feature_model_table',"\
@@ -53,7 +63,7 @@ fi
 "numberThreadsToUse='$numberThreadsToUse',"\
 "pixelSize_xy='$pixelSize_xy',"\
 "pixelSize_z='$pixelSize_z',"\
-"intensityScalingFactor='$intensityScalingFactor',"\
+"intensityScalingFactor='$intensityScalingFactorAdjusted',"\
 "cropBox='$cropBox'"
 
 ~/Fiji.app/ImageJ-linux64 --ij2 --headless --run ~/code/apply_classifiers.groovy \
@@ -71,4 +81,6 @@ fi
 "channel_grouping='$channel_grouping',"\
 "channels='$channels'"
 
+done
 sleep 10s
+echo "Finished"
