@@ -5,12 +5,12 @@
 #PBS -l select=1:ncpus=3:mpiprocs=3:mem=80GB,walltime=1:00:00
 
 
-feature_model_table='/home/uqjlefev/code/feature_model_table.txt'
-imageStackLocation='/RDS/Q0930/MachineLearning_ARC_Grant_work/MDA231Yvette/28072020/MDA231control_2/Decon_output/'
-modelName='d19_rep1ds1gd_rf'
+feature_model_table='/code/feature_model_table.txt'
+imageStackLocation='/images/'
+modelName='model_name'
 modelPath='models/'
 featurePath=$TMPDIR'/fs/'
-savePath='/RDS/Q0930/MachineLearning_ARC_Grant_work/MDA231Yvette/28072020/MDA231control_2/segmentation/d19_intAdj_rep1ds1gd_rf/'
+savePath='/outputs/'
 numberThreadsToUse='3'
 saveProbabilityMaps='true'
 stackNumberPrefix='t'
