@@ -1,7 +1,7 @@
 #!/bin/bash
 #
-#PBS -N object_detection_Caroline
-#PBS -A UQ-IMB
+#PBS -N object_detection
+#PBS -A Your_Account_String
 #PBS -l select=1:ncpus=6:mpiprocs=6:mem=120GB,walltime=3:00:00
 
 (sleep $(( ($PBS_ARRAY_INDEX % 10) * 15 )))
@@ -12,27 +12,26 @@ firstStack=$(( ($lastStack)-($numberStacksPerJob)+1 ))
 
 echo "job "$PBS_ARRAY_INDEX" stacks "$firstStack" - "$lastStack
 
-/scratch/user/uqrpien1/tmp/pipeline/Fiji.app/ImageJ-linux64 --ij2 --headless --allow-multiple --run /scratch/user/uqrpien1/tmp/pipeline/code/split_object_analysis.groovy \
-"imageStackLocation='/scratch/user/uqrpien1/tmp/pipeline/outputs/segmented/',"\
-"originalStackLocation='/QRISdata/Q2823/Data_for_Richard/Deskewed/June/BEST_20210617/',"\
-"probStackLocation='scratch/user/uqrpien1/tmp/pipeline/outputs/probability_maps/',"\
-"savePath='scratch/user/uqrpien1/tmp/pipeline/outputs/objects/',"\
+~/Fiji.app/ImageJ-linux64 --ij2 --headless --allow-multiple --run ~/code/split_object_analysis.groovy \
+"imageStackLocation='/outputs/segmented/',"\
+"originalStackLocation='/images/',"\
+"probStackLocation='/outputs/probability_maps/',"\
+"savePath='/outputs/objects/',"\
 "firstStackNumber='$firstStack',"\
 "lastStackNumber='$lastStack',"\
 "numberThreadsToUse='6',"\
 "stackNumberPrefix='e',"\
 "stackNumberSuffix='_c',"\
-"fileNamePrefix='',"\
 "overwriteExisting='false',"\
-"classNumsToFill='[2,3]',"\
-"classesToAnalyse='[1,2,3]',"\
-"classLayers='[1,2,2]',"\
-"incorporatedChannels='[[1],[2],[3]]',"\
-"dynamic='[200,10,10]',"\
-"minVoxExtraObjects='75',"\
-"channelsForDistanceMap='[2,3]',"\
-"smoothingErosionForDistanceMap='[20,20]',"\
-"intensityScalingFactor='1',"\
+"classNumsToFill=[2,3],"\
+"classesToAnalyse=[1,2,3],"\
+"classLayers=[1,2,2],"\
+"incorporatedChannels=[[1],[2],[3]],"\
+"dynamic=[200,10,10],"\
+"minVoxExtraObjects=75,"\
+"channelsForDistanceMap=[2,3],"\
+"smoothingErosionForDistanceMap=[20,20],"\
+"intensityScalingFactor=1,"\
 "cropBox=''"
 
 exit 0

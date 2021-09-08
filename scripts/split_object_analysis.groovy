@@ -86,8 +86,6 @@
  * A string identifying the end of the stack number in the filename. The script will look for a filename 
  * which contains a substring consisting of stackNumberPrefix, optional zeros, the stack number associated 
  * with the job, then stackNumberSuffix.
- * @param fileNamePrefix
- * Only stack names starting with this string will be processed; leave blank (prefix='') to skip this filter.
  * @param overwriteExisting
  * A string equal to 'true' or 'false'. If false, the job will check for the output file objectStats.txt in the 
  * expected location, and if present it will not process the stack. This is useful for easily redoing failed 
@@ -164,7 +162,6 @@
 #@ String numberThreadsToUse
 #@ String stackNumberPrefix
 #@ String stackNumberSuffix
-#@ String fileNamePrefix
 #@ Boolean overwriteExisting
 #@ int[] classNumsToFill
 #@ int[] classesToAnalyse
