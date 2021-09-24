@@ -41,11 +41,11 @@
  * location to save segmented image and probability map
  * 
  * @param numberThreadsToUse
- * number of threads that ImageJ is asked to use
+ * number of threads that ImageJ is asked to use. Default = 4. 
  * 
  * @param saveProbabilityMaps 
  * value 'true' or 'false': whether to save the estimated probability distribution across the clases for each voxel, 
- * as well as the semantic segmentation 
+ * as well as the semantic segmentation. Default = 'true'
  * 
  * @param pixelSize_unit, pixelSize_xy, pixelSize_z
  * Used to set image properties in the output files.
@@ -61,7 +61,7 @@
  * The default (no grouping) value is [[0],[1],...,[n-1]]
  * 
  * @param channels
- * The number of segmentation classes defined by the supplied model
+ * The number of segmentation classes defined by the supplied model. Must be specified. 
  */
 
 
@@ -71,13 +71,13 @@
 #@ String modelPath
 #@ String modelName
 #@ String savePath
-#@ String numberThreadsToUse
-#@ String saveProbabilityMaps
+#@ String(value="4",persist=false) numberThreadsToUse
+#@ String(value="true",persist=false) saveProbabilityMaps
 #@ String pixelSize_unit
 #@ Float pixelSize_xy
 #@ Float pixelSize_z
-#@ int[][] channel_grouping
-#@ int channels
+#@ int[][](value=[[1]],persist=false) channel_grouping
+#@ int (value=0,persist=false) channels
 
 import java.text.SimpleDateFormat
 import groovy.time.TimeCategory 
@@ -94,6 +94,7 @@ import trainableSegmentation.FeatureStack;
 import trainableSegmentation.FeatureStackArray;
 import wekaSegInterface.ApplyClassifier;
 
+
 println("starting apply_classifiers.groovy")
 sdf = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss")
 
@@ -105,10 +106,8 @@ segmentator = new WekaSegmentation(true);
 String fl = saveProbabilityMaps.substring(0,1).toUpperCase()
 boolean probMaps =  (fl == "T" || fl == "Y")
 
-int threadNum = 4 // default
-if (numberThreadsToUse != null){
-	if (numberThreadsToUse.isInteger()) {threadNum = numberThreadsToUse as Integer}
-}
+if (numberThreadsToUse.isInteger()) {threadNum = numberThreadsToUse as Integer}
+
 date = new Date(); println("Classifying using " + threadNum + " threads   " + sdf.format(date))
 println("Probability maps " + (probMaps ? "WILL" : "will NOT") + " be produced")
 
@@ -133,7 +132,20 @@ println("Using " + featureList.size + " features");
 probMapStart = new Date();
 ImageStack probImageStack =  ApplyClassifier.classifyImage(featureList, featureDerived,featureParameters, featurePath, segmentator, threadNum, true);
 println("prob map stack has dimensions " + probImageStack.getWidth() + "x" + probImageStack.getHeight() + "x" + probImageStack.getSize());
-	
+
+
+// check for channel parameter supplied
+if (channels == 0) {
+throw new IllegalArgumentException('Parameter "channels" must be specified');
+}
+
+// get default channel grouping if none supplied
+if (channel_grouping.length == 1) {
+channel_grouping = new int[channels][1];
+for(int i = 0; i < channel_grouping.length; i++)
+    channel_grouping[i][0] = i
+}
+
 ImageStack classifiedImageStack = ApplyClassifier.segFromProbMap(probImageStack,channel_grouping);
 println("Generated image stack with dimensions " + classifiedImageStack.getWidth() + "x" + classifiedImageStack.getHeight() + "x" + classifiedImageStack.getSize());
 probMapEnd = new Date();

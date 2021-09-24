@@ -8,6 +8,8 @@ The scripts call parameterised groovy scripts via a headless ImageJ process, and
 
 compile this doc to html in linux:  pandoc -o script_documentation.html script_documentation.md
 
+Please Note: The template scripts have default PBS headers specifying the required resources and account string that will need to be overwritten for your needs.
+
 ### Preparing job scripts
 
 For each task, copy and rename the template job script (or a template you have customised). Edit PBS options and paths as specified below, and consult detailed notes further down to customise parameters.
@@ -30,7 +32,7 @@ This will create one job for each integer in the specified range. Consult HPC do
 
 ### Semantic segmentation
 
-**template script:** segment_20200728_MDA231control_2 / segment_multi_20200728_MDA231control_2
+**template script:** 1a_segmention / 1b_segment_multi
 
 Applies a trained Weka classification model to segment sequences of tiff stacks. Although based on the Trainable Weka ImageJ plugin, a customised process is used. In the standard script, each job in the array segments one image stack, where the stack number (parsed from filename, see stackNumberPrefix and stackNumberSuffix below) matches the PBS_ARRAY_INDEX. In the "multi" script a series of stacks are segmented within each job (allowing control of the degree of parallelism and expected runtime of each job). A job will be allocated stacks numberStacksPerJob*PBS_ARRAY_INDEX-numberStacksPerJob+1 to numberStacksPerJob*PBS_ARRAY_INDEX inclusive.
 
@@ -73,7 +75,7 @@ The default (no grouping) value is '[[0],[1],...,[n-1]]'
 
 ### Primary object analysis
 
-**template script:** objects_20190830_pos3_d19
+**template script:** 2_object_detection
 
 Defines and quantifies objects in a semantic segmentation of a 3D image (provided as an 8-bit color tiff stack). See documentation for split_object_analysis.groovy in code_and_file_descriptions for full information. For each channel (tissue type) to be analysed, 3D hole filling is applied, followed by a watershed split algorithm to separate touching objects. Then various metrics are calculated for each object, and saved in a table. The original image and the segmentation probability map are used for this purpose if available. A separate output table quantifies contact between objects, whether they are in the same class or not. This code also supports a class hierarchy, where additional classes can be defined as the combination of one or more of the original classes, and analysed as such; these must be arranged in layers so that each original class is used at most once in each layer.
 
@@ -96,7 +98,6 @@ The remaining parameters are included in the groovy script call; firstStackNumbe
 - numberThreadsToUse: The number of threads that ImageJ should use.
 - stackNumberPrefix: A string identifying the start of the stack number in the filename (stack number may be left-padded with zeroes).
 - stackNumberSuffix: A string identifying the end of the stack number in the filename. The script will look for a filename which contains a substring consisting of stackNumberPrefix, optional zeros, the stack number associated with the job, then stackNumberSuffix
-- fileNamePrefix: Only stack names starting with this string will be processed; leave blank (prefix='') to skip this filter. 
 - overwriteExisting: A string equal to 'true' or 'false'. If false, the job will check for the output file objectStats.txt in the expected location, and if present it will not process the stack. This is useful for easily redoing failed tasks while not repeating tasks that completed successfully.
 - classNumsToFill: A list of comma-separated integers within square brackets, which should be selected from the class numbers in the segmentations (the index values when loading in ImageJ). This is not necessarily the same as the classes in classesToAnalyse below. For each listed class in turn, a 3D hole-filling algorithm is applied to the segmentation. While often useful for removing small pockets of mis-segmentation and improving the function of the watershedding algorithm, care should be taken: if a legitimate structure is entirely enveloped (in 3 dimensions) in a region of another class, then the structure will be removed and replaced with the surrounding class. The background class should not be included in this list, as that will typically result in the removal of all structures (treated as "holes" in the background).
 - classesToAnalyse: A list of comma-separated integers between square brackets, e.g. '[1,2,3]'. Specifies which classes to analyse; in the simple case these correspond directly to the colours (segmentation classes) in the input segmentations, but may be more complex if class aggregation or hierarchy is used (see below). Typically class 0 is black and represents background, and should not be included in analysis.
@@ -112,7 +113,7 @@ The remaining parameters are included in the groovy script call; firstStackNumbe
 
 ### Generate object meshes
 
-**template script:** meshes_20190830_pos3_d19
+**template script:** 3a_meshes
 
 Generates meshes in the [OBJ format](https://en.wikipedia.org/wiki/Wavefront_.obj_file) defining object surfaces. Coordinates are in voxel units. Meshes are used primarily for visualisation, but may also be used for analysis. This script is an add-on to the primary object analysis above, using some of its outputs. The required input is one or more 8- or 16-bit color tiff stacks named object_map.tif, object_map2.tif etc where the (integer) voxel values define object masks. In addition, we require a text file objectStats.txt containing a tab-separated table with integer-value columns named id and class (any other columns are allowed, but are not used). The IDs must match the voxel values in order for objects to be processed, and the class should be correct for the object as per the original segmentation and the primary object analysis.
 
@@ -139,7 +140,7 @@ Job array index i will process stacks $numberStacksPerJob*(i-1)+1$ to $numberSta
 
 ### Generate object skeletons
 
-**template script:** skeletons_20190830_pos3_d19
+**template script:** 3b_skeletons
 
 Generates skeleton representations of objects. Each object is eroded in 3D down to a [topological skeleton](https://en.wikipedia.org/wiki/Topological_skeleton), and then reduced to summary information at the branch level (a branch is a segment of the skeleton between 2 branch or end points). For each branch, we save the start and end coordinates, and the curved branch length as well as the straight line distance. Coordinates and distances are in the units defined in the image properties. Skeletons are used primarily for visualisation, but may also be used for analysis. They are mostly useful for linear structures. As for meshes, this script is an add-on to the primary object analysis above, using some of its outputs. The required input is one or more 8- or 16-bit color tiff stacks named object_map.tif, object_map2.tif etc where the (integer) voxel values define object masks. In addition, we require a text file objectStats.txt containing a tab-separated table with integer-value columns named id and class (any other columns are allowed, but are not used). The IDs must match the voxel values in order for objects to be processed, and the class should be correct for the object as per the original segmentation and the primary object analysis.
 

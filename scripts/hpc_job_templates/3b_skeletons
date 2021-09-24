@@ -1,7 +1,7 @@
 #!/bin/bash
 #
-#PBS -N skeletons_20190830_pos3_d19
-#PBS -A UQ-IMB
+#PBS -N skeletons
+#PBS -A Your_Account_String
 #PBS -l select=1:ncpus=2:mpiprocs=2:mem=10GB,walltime=2:30:00
 
 (sleep $(( ($PBS_ARRAY_INDEX % 10) * 15 )))
@@ -13,8 +13,8 @@ firstStack=$(( ($lastStack)-($numberStacksPerJob)+1 ))
 echo "job "$PBS_ARRAY_INDEX" stacks "$firstStack" - "$lastStack
 
 ~/Fiji.app/ImageJ-linux64 --ij2 --headless --allow-multiple --run ~/code/get_skeletons.groovy \
-"imageStackLocation='/RDS/Q0930/MachineLearning_ARC_Grant_work/20190830_LLSM_Yvette/Pos3/segmentation/d19_intAdj_rep1ds1gd_rf/objectAnalysis/',"\
-"savePath='/RDS/Q0930/MachineLearning_ARC_Grant_work/20190830_LLSM_Yvette/Pos3/segmentation/d19_intAdj_rep1ds1gd_rf/objectAnalysis/',"\
+"imageStackLocation='/outputs/objectAnalysis/',"\
+"savePath='/outputs/objectAnalysis/skeletons/',"\
 "classesToAnalyse='[2]',"\
 "firstStackNumber='$firstStack',"\
 "lastStackNumber='$lastStack',"\
